@@ -1,0 +1,6 @@
+#Compiled objects and binaries
+/ChainLink/bin
+/ChainLink/obj
+
+#Dependencies
+/packages
