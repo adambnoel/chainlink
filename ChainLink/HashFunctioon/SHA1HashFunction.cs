@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
+
 namespace DHTSharp
 {
 	public class SHA1HashFunction : IHashFunction

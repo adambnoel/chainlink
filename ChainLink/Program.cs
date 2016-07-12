@@ -28,6 +28,7 @@ namespace DHTSharp
 				NetworkStream networkStream = clientSocket.GetStream();
 				byte[] bytesFrom = new byte[10025];
 				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
+
 				string dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
 				dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
 				Console.WriteLine(" >> Data from client - " + dataFromClient);
