@@ -30,6 +30,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -44,6 +46,9 @@
     <Compile Include="Requests\KPutRequest.cs" />
     <Compile Include="Requests\DeleteRequest.cs" />
     <Compile Include="Requests\RequestParser.cs" />
+    <Compile Include="Networking\RoutingTable.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="KeyspacePartitioning\Keyspace.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -51,5 +56,11 @@
     <Folder Include="KeyspacePartitioning\" />
     <Folder Include="Node\" />
     <Folder Include="Requests\" />
+    <Folder Include="Networking\" />
+    <Folder Include="HashTable\" />
+    <Folder Include="Logging\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
 </Project>
