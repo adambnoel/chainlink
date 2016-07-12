@@ -46,10 +46,12 @@
     <Compile Include="Commands\CommandType.cs" />
     <Compile Include="Commands\CommandFactory.cs" />
     <Compile Include="Commands\ErrorCommand.cs" />
+    <Compile Include="Network\TcpClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Requests\" />
     <Folder Include="Commands\" />
+    <Folder Include="Network\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -12,6 +12,7 @@ namespace ChainLinkCLI
 			while (commandLineArgument != "Exit")
 			{
 				commandLineArgument = Console.ReadLine();
+				parser.ParseCommand(commandLineArgument);
 			}
 			Console.WriteLine("Shutting down ChainLink CLI");
 		}

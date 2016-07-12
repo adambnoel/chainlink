@@ -3,10 +3,10 @@ namespace ChainLinkCLI
 {
 	public class ConfigCommand : ICommand
 	{
-		private String context;
-		public ConfigCommand(String commandContext)
+		private String text;
+		public ConfigCommand(String commandText)
 		{
-			context = commandContext;
+			text = commandText;
 		}
 
 		public void ExecuteCommand()

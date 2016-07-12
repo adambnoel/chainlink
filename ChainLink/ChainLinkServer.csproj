@@ -49,6 +49,7 @@
     <Compile Include="Networking\RoutingTable.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="KeyspacePartitioning\Keyspace.cs" />
+    <Compile Include="Node\NodeConfiguration.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -59,6 +60,7 @@
     <Folder Include="Networking\" />
     <Folder Include="HashTable\" />
     <Folder Include="Logging\" />
+    <Folder Include="DataStorage\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

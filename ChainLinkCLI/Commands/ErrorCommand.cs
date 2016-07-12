@@ -10,7 +10,7 @@ namespace ChainLinkCLI
 		private List<String> validCommands = new List<String>(new String[] {"config", "request"});
 		public ErrorCommand(String commandText)
 		{
-			incorrectCommand = commandText;
+			incorrectCommand = commandText.Split()[0];
 		}
 		public void ExecuteCommand()
 		{

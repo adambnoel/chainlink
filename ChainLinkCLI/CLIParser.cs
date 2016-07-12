@@ -6,20 +6,30 @@ namespace ChainLinkCLI
 		public ICommand ParseCommand(String commandText)
 		{
 			ICommand command = null;
-			CommandFactory.GetCommand(parseCommandType(commandText), parseCommandDetails(commandText));
+			CommandFactory.GetCommand(parseCommandType(commandText), commandText);
 			return command;
 		}
 
 		private CommandType parseCommandType(String commandText)
 		{
-			return CommandType.Config;
-		}
-
-		private String parseCommandDetails(String commandText)
-		{
-			String details = String.Empty;
-
-			return details;
+			String[] splitText = commandText.Split(' ');
+			if (splitText.Length <= 1)
+			{
+				return CommandType.Error;
+			}
+			switch (splitText[0])
+			{
+				case "Request":
+					return CommandType.Request;
+				case "request":
+					return CommandType.Request;
+				case "Config":
+					return CommandType.Config;
+				case "config":
+					return CommandType.Config;
+				default:
+					return CommandType.Error;
+			}
 		}
 	}
 }
