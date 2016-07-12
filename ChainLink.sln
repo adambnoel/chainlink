@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainLinkServer", "ChainLink\ChainLinkServer.csproj", "{D4594128-32AA-4F01-830C-03A905E1228A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainLinkClient", "ChainLinkClient\ChainLinkClient.csproj", "{A2FA41B4-79B9-45A0-B054-C7606223140B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainLinkCLI", "ChainLinkCLI\ChainLinkCLI.csproj", "{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,5 +15,9 @@ Global
 		{D4594128-32AA-4F01-830C-03A905E1228A}.Debug|x86.Build.0 = Debug|x86
 		{D4594128-32AA-4F01-830C-03A905E1228A}.Release|x86.ActiveCfg = Release|x86
 		{D4594128-32AA-4F01-830C-03A905E1228A}.Release|x86.Build.0 = Release|x86
+		{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}.Debug|x86.ActiveCfg = Debug|x86
+		{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}.Debug|x86.Build.0 = Debug|x86
+		{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}.Release|x86.ActiveCfg = Release|x86
+		{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 EndGlobal

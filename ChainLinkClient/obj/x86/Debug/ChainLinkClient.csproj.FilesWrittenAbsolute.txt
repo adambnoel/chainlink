@@ -1,6 +1,0 @@
-/Users/adamnoel/Projects/ChainLink/ChainLinkClient/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
-/Users/adamnoel/Projects/ChainLink/ChainLinkClient/obj/x86/Debug/ChainLinkClient.gtk-gui.gui.stetic
-/Users/adamnoel/Projects/ChainLink/ChainLinkClient/bin/Debug/ChainLinkClient.exe.mdb
-/Users/adamnoel/Projects/ChainLink/ChainLinkClient/bin/Debug/ChainLinkClient.exe
-/Users/adamnoel/Projects/ChainLink/ChainLinkClient/obj/x86/Debug/ChainLinkClient.exe
-/Users/adamnoel/Projects/ChainLink/ChainLinkClient/obj/x86/Debug/ChainLinkClient.exe.mdb
