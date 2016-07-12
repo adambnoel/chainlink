@@ -9,12 +9,13 @@ namespace ChainLinkCLI
 			String commandLineArgument = String.Empty;
 			CLIParser parser = new CLIParser();
 			Console.WriteLine("Starting ChainLink CLI");
+			Console.WriteLine("Enter command");
 			while (commandLineArgument != "Exit")
 			{
 				commandLineArgument = Console.ReadLine();
 				parser.ParseCommand(commandLineArgument);
 			}
-			Console.WriteLine("Shutting down ChainLink CLI");
+			Console.WriteLine("Exiting ChainLink CLI");
 		}
 	}
 }

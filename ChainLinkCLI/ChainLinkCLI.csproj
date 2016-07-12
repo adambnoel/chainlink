@@ -30,6 +30,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -47,11 +49,17 @@
     <Compile Include="Commands\CommandFactory.cs" />
     <Compile Include="Commands\ErrorCommand.cs" />
     <Compile Include="Network\TcpClient.cs" />
+    <Compile Include="Requests\IRequest.cs" />
+    <Compile Include="Requests\RequestFactory.cs" />
+    <Compile Include="CLIConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Requests\" />
     <Folder Include="Commands\" />
     <Folder Include="Network\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

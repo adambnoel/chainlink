@@ -3,10 +3,10 @@ namespace ChainLinkCLI
 {
 	public class RequestCommand : ICommand
 	{
-		private String text;
+		IRequest request = null;
 		public RequestCommand(String commandText)
 		{
-			text = commandText;
+			request = RequestFactory.GetRequest(commandText);
 		}
 
 		public void ExecuteCommand()
