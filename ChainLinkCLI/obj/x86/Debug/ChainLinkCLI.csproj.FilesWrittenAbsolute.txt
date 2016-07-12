@@ -1,0 +1,5 @@
+/Users/adamnoel/Projects/ChainLink/ChainLinkCLI/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/Users/adamnoel/Projects/ChainLink/ChainLinkCLI/bin/Debug/ChainLinkCLI.exe.mdb
+/Users/adamnoel/Projects/ChainLink/ChainLinkCLI/bin/Debug/ChainLinkCLI.exe
+/Users/adamnoel/Projects/ChainLink/ChainLinkCLI/obj/x86/Debug/ChainLinkCLI.exe
+/Users/adamnoel/Projects/ChainLink/ChainLinkCLI/obj/x86/Debug/ChainLinkCLI.exe.mdb
