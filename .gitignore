@@ -4,3 +4,6 @@
 
 #Dependencies
 /packages
+
+#OS-X only
+.DS_Store
