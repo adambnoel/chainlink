@@ -3,7 +3,7 @@ namespace ChainLinkCLI
 {
 	public interface IRequest
 	{
-		String Process();
+		void Process();
 	}
 }
 

@@ -3,11 +3,11 @@ using System.Text;
 
 namespace ChainLinkCLI
 {
-	public class KGetRequest : IRequest
+	public class KDeleteRequest : IRequest
 	{
 		private String requestKey;
 		private int kVotes;
-		public KGetRequest(String key, int votes) 
+		public KDeleteRequest(String key, int votes)
 		{
 			requestKey = key;
 			kVotes = votes;
@@ -17,14 +17,14 @@ namespace ChainLinkCLI
 		{
 			CLIConfigManager configManager = new CLIConfigManager();
 			TcpRequest request = new TcpRequest(configManager.GetIPAddress(), configManager.GetPortNumber(), configManager.GetMaxRequestSize());
-			String response = request.Send(initializeGetRequest());
+			String response = request.Send(initializeDeleteRequest());
 			handleResponse(response);
 		}
 
-		private String initializeGetRequest()
+		private String initializeDeleteRequest()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.Append('*'); //ChainLink protocol defines * as a get request
+			sb.Append('-');
 			sb.Append("\r\n");
 			sb.Append(kVotes);
 			sb.Append("\r\n");
@@ -35,7 +35,7 @@ namespace ChainLinkCLI
 
 		private void handleResponse(String response)
 		{
-
+			
 		}
 	}
 }

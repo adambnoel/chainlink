@@ -48,10 +48,12 @@
     <Compile Include="Commands\CommandType.cs" />
     <Compile Include="Commands\CommandFactory.cs" />
     <Compile Include="Commands\ErrorCommand.cs" />
-    <Compile Include="Network\TcpClient.cs" />
+    <Compile Include="Network\TcpRequest.cs" />
     <Compile Include="Requests\IRequest.cs" />
     <Compile Include="Requests\RequestFactory.cs" />
     <Compile Include="CLIConfigManager.cs" />
+    <Compile Include="Requests\KDeleteRequest.cs" />
+    <Compile Include="Requests\ErrorRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Requests\" />

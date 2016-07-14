@@ -11,7 +11,7 @@ namespace ChainLinkCLI
 
 		public void ExecuteCommand()
 		{
-			
+			request.Process();	
 		}
 	}
 }

@@ -19,6 +19,7 @@ namespace ChainLinkCLI
 		public String Send(String requestContents)
 		{
 			TcpClient clientSocket = new TcpClient();
+			clientSocket.Connect(address, port);
 			NetworkStream serverStream = clientSocket.GetStream();
 			byte[] requestBytes = Encoding.ASCII.GetBytes(requestContents);
 			serverStream.Write(requestBytes, 0, requestBytes.Length);

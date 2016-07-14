@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+
 namespace ChainLinkCLI
 {
 	public class GetRequest : IRequest
@@ -9,19 +11,27 @@ namespace ChainLinkCLI
 			requestKey = key;
 		}
 
-		public String Process()
+		public void Process()
 		{
-			return String.Empty;
+			CLIConfigManager configManager = new CLIConfigManager();
+			TcpRequest request = new TcpRequest(configManager.GetIPAddress(), configManager.GetPortNumber(), configManager.GetMaxRequestSize());
+			String response = request.Send(initializeGetRequest());
+			handleResponse(response);
 		}
 
 		private String initializeGetRequest()
 		{
-			return String.Empty;
+			StringBuilder sb = new StringBuilder();
+			sb.Append('*'); //ChainLink protocol defines * as a get request
+			sb.Append("\r\n");
+			sb.Append(requestKey);
+			sb.Append("\r\n");
+			return sb.ToString();
 		}
 
-		private String handleResponse()
+		private void handleResponse(String response)
 		{
-			return String.Empty;
+			
 		}
 	}
 }
