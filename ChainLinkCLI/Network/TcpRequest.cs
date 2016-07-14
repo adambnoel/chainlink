@@ -27,6 +27,7 @@ namespace ChainLinkCLI
 
 			byte[] inputStream = new byte[maxRequestSize];
 			serverStream.Read(inputStream, 0, maxRequestSize);
+			clientSocket.Close();
 			return Encoding.ASCII.GetString(inputStream);
 		}
 	}

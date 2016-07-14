@@ -50,6 +50,10 @@
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="KeyspacePartitioning\Keyspace.cs" />
     <Compile Include="Node\NodeConfiguration.cs" />
+    <Compile Include="ClientRequestHandler.cs" />
+    <Compile Include="Requests\IRequest.cs" />
+    <Compile Include="Requests\KDeleteRequest.cs" />
+    <Compile Include="Requests\ErrorRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

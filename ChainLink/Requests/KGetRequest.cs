@@ -1,10 +1,19 @@
 ﻿using System;
 namespace DHTSharp
 {
-	public class KGetRequest
+	public class KGetRequest : IRequest
 	{
-		public KGetRequest()
+		private int votes;
+		private string key;
+		public KGetRequest(String requestKey, int kVotes)
 		{
+			key = requestKey;
+			votes = kVotes;
+		}
+
+		public String ProcessRequest()
+		{
+			return String.Empty;
 		}
 	}
 }

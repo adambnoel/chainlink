@@ -5,7 +5,8 @@ namespace ChainLinkCLI
 	{
 		Error,
 		Request,
-		Config
+		Config,
+		Exit
 	}
 }
 

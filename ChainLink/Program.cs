@@ -19,18 +19,16 @@ namespace DHTSharp
 			TcpListener serverSocket = new TcpListener(address, 8386);
 			TcpClient clientSocket = default(TcpClient);
 			serverSocket.Start();
-			clientSocket = serverSocket.AcceptTcpClient();
-			int requestCount = 0;
 
 			while (true)
 			{
-				requestCount = requestCount + 1;
+				clientSocket = serverSocket.AcceptTcpClient();
 				NetworkStream networkStream = clientSocket.GetStream();
 				byte[] bytesFrom = new byte[10025];
 				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
 
 				string dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
-				dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
+				dataFromClient = dataFromClient.Substring(0, dataFromClient.LastIndexOf("\r\n", System.StringComparison.Ordinal));
 				Console.WriteLine(" >> Data from client - " + dataFromClient);
 				string serverResponse = "Last Message from client" + dataFromClient;
 				Byte[] sendBytes = Encoding.ASCII.GetBytes(serverResponse);
@@ -42,6 +40,13 @@ namespace DHTSharp
 			serverSocket.Stop();
 			clientSocket.Close();
 		}
+
+		private static void HandleRequest()
+		{
+			
+		}
+
+
 	}
 }
 

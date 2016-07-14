@@ -5,20 +5,18 @@ namespace ChainLinkCLI
 	{
 		public static ICommand GetCommand(CommandType commandType, String commandText)
 		{
-			ICommand command = null;
 			switch (commandType)
 			{
 				case CommandType.Config:
-					command = new ConfigCommand(commandText);
-					break;
+					return new ConfigCommand(commandText);
 				case CommandType.Request:
-					command = new ConfigCommand(commandText);
-					break;
+					return new RequestCommand(commandText);
+				case CommandType.Exit:
+					return new ExitCommand();
 				default:
-					command = new ErrorCommand(commandText);
-					break;
+					return new ErrorCommand(commandText);
+
 			}
-			return command;
 		}
 	}
 }

@@ -1,10 +1,19 @@
 ﻿using System;
 namespace DHTSharp
 {
-	public class PutRequest
+	public class PutRequest : IRequest
 	{
-		public PutRequest()
+		private string key;
+		private string body;
+
+		public PutRequest(string requestKey, string requestBody)
 		{
+			key = requestKey;
+			body = requestBody;
+		}
+		public String ProcessRequest()
+		{
+			return String.Empty;
 		}
 	}
 }
