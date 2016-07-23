@@ -11,12 +11,18 @@ namespace DHTSharp
 		private List<Ring> nodeDHTRings;
 		private IPAddress nodeAddress;
 		private int nodeSocket;
+		private int failedPingCount = 0;
+		private int failedPingThreshold = 5;
 
 		public Node (List<Ring> DHTRings, IPAddress NodeAddress, int Socket) 
 		{
 			nodeDHTRings = DHTRings;
 			nodeAddress = NodeAddress;
 			nodeSocket = Socket;
+		}
+		public String Serialize()
+		{
+			return String.Empty;
 		}
 		public Boolean checkNodeRingsForKey(String hashKey)
 		{
@@ -29,6 +35,21 @@ namespace DHTSharp
 				}
 			}
 			return false;
+		}
+
+		public Boolean FailedNodePulse()
+		{
+			failedPingCount++;
+			if (failedPingCount >= failedPingThreshold)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		public void ResetFailedPingCount()
+		{
+			failedPingCount = 0;
 		}
 	}
 }
