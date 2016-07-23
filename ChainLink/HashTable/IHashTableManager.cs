@@ -8,6 +8,7 @@ namespace DHTSharp
 	public interface IHashTableManager
 	{
 		Boolean Run();
+		Boolean AddRequestHandler(ClientRequestHandler requestHandler);
 		Boolean RequestJoinNetwork(Node node);
 		Boolean RequestLeaveNetwork(Node node);
 		Boolean AddNetworkNode(Node node);

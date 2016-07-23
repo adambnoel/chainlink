@@ -24,6 +24,7 @@ namespace DHTSharp
 		{
 			return String.Empty;
 		}
+
 		public Boolean checkNodeRingsForKey(String hashKey)
 		{
 			foreach (Ring r in nodeDHTRings)

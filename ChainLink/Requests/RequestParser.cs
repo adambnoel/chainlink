@@ -38,6 +38,21 @@ namespace DHTSharp
 					{
 						return new GetRequest(splitRequest[1]);
 					}
+				case "$":
+					if (splitRequest.Length == 2)
+					{
+						return new ErrorRequest(request);
+					}
+					else 
+					{
+						return new ErrorRequest(request);
+					}
+				case "!":
+					return new ErrorRequest(request);
+				case "@":
+					return new ErrorRequest(request);
+				case "#":
+					return new ErrorRequest(request);
 				default:
 					return new ErrorRequest(request);
 			}

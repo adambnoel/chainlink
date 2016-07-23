@@ -19,6 +19,11 @@ namespace DHTSharp
 			hashFunctionRange = HashFunctionRange;
 			hashTableManager = HashTableManager;
 		}
+		public String Serialize()
+		{
+			
+			return String.Empty;
+		}
 
 		public BigInteger GetHashkeyDistance(String hashKey)
 		{
@@ -85,6 +90,7 @@ namespace DHTSharp
 			hashFunctionMaxValue = hashFunctionMaxValue - 1;
 			return (hashKey + hashFunctionMaxValue);
 		}
+
 	}
 }
 

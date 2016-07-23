@@ -14,6 +14,8 @@ namespace DHTSharp
 	{
 		public static void Main (string[] args)
 		{
+			
+
 			IPAddress address = IPAddress.Parse(ConfigurationManager.AppSettings.Get("IPAddress"));
 			TcpListener serverSocket = new TcpListener(address, 8386);
 			TcpClient clientSocket = default(TcpClient);
@@ -22,13 +24,19 @@ namespace DHTSharp
 			while (true)
 			{
 				clientSocket = serverSocket.AcceptTcpClient();
+				ClientRequestHandler requestHandler = new ClientRequestHandler();
+				//requestHandler.Start(clientSocket);
+
+
+				/**
 				NetworkStream networkStream = clientSocket.GetStream();
-				byte[] bytesFrom = new byte[10025];
+				byte[] bytesFrom = new byte[2000000];
 				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
 
 				String clientData = System.Text.Encoding.ASCII.GetString(bytesFrom);
 				clientData = clientData.Substring(0, clientData.LastIndexOf("\r\n", StringComparison.Ordinal));
 				Console.WriteLine("Received request from client");
+				**/
 
 				//Console.WriteLine(" >> Data from client - " + dataFromClient);
 				//string serverResponse = "Last Message from client" + dataFromClient;
@@ -41,6 +49,8 @@ namespace DHTSharp
 			serverSocket.Stop();
 			clientSocket.Close();
 		}
+
+
 	}
 }
 

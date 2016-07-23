@@ -47,7 +47,6 @@
     <Compile Include="Requests\KPutRequest.cs" />
     <Compile Include="Requests\DeleteRequest.cs" />
     <Compile Include="Requests\RequestParser.cs" />
-    <Compile Include="Logging\ILogger.cs" />
     <Compile Include="KeyspacePartitioning\Keyspace.cs" />
     <Compile Include="ClientRequestHandler.cs" />
     <Compile Include="Requests\IRequest.cs" />
@@ -62,6 +61,8 @@
     <Compile Include="Requests\LeaveRequest.cs" />
     <Compile Include="Requests\PingRequest.cs" />
     <Compile Include="Requests\GossipRequest.cs" />
+    <Compile Include="Logging\CoreLogger.cs" />
+    <Compile Include="Logging\LoggingLevel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
