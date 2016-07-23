@@ -18,7 +18,7 @@ namespace DHTSharp
 			sb.Append("\r\n");
 			sb.Append("Failed to process request: ");
 			sb.Append(requestText);
-			sb.Append(". Invalid request header.");
+			sb.Append(". Invalid request format.");
 			sb.Append("\r\n");
 			return sb.ToString();
 		}

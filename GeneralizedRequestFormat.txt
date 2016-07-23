@@ -1,0 +1,8 @@
+[RequestTypeCharacter]
+/r/n
+[RequestParameter1]
+/r/n
+[OptionalRequestParameter1]
+/r/n
+[OptionalRequestParameter2]
+/r/n

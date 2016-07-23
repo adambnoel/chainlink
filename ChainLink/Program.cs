@@ -14,7 +14,6 @@ namespace DHTSharp
 	{
 		public static void Main (string[] args)
 		{
-			Console.WriteLine("Derp?");
 			IPAddress address = IPAddress.Parse(ConfigurationManager.AppSettings.Get("IPAddress"));
 			TcpListener serverSocket = new TcpListener(address, 8386);
 			TcpClient clientSocket = default(TcpClient);
@@ -27,26 +26,21 @@ namespace DHTSharp
 				byte[] bytesFrom = new byte[10025];
 				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
 
-				string dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
-				dataFromClient = dataFromClient.Substring(0, dataFromClient.LastIndexOf("\r\n", System.StringComparison.Ordinal));
-				Console.WriteLine(" >> Data from client - " + dataFromClient);
-				string serverResponse = "Last Message from client" + dataFromClient;
-				Byte[] sendBytes = Encoding.ASCII.GetBytes(serverResponse);
-				networkStream.Write(sendBytes, 0, sendBytes.Length);
-				networkStream.Flush();
-				Console.WriteLine(" >> " + serverResponse);
+				String clientData = System.Text.Encoding.ASCII.GetString(bytesFrom);
+				clientData = clientData.Substring(0, clientData.LastIndexOf("\r\n", StringComparison.Ordinal));
+				Console.WriteLine("Received request from client");
+
+				//Console.WriteLine(" >> Data from client - " + dataFromClient);
+				//string serverResponse = "Last Message from client" + dataFromClient;
+				//Byte[] sendBytes = Encoding.ASCII.GetBytes(serverResponse);
+				//networkStream.Write(sendBytes, 0, sendBytes.Length);
+				//networkStream.Flush();
+				//Console.WriteLine(" >> " + serverResponse);
 			}
 
 			serverSocket.Stop();
 			clientSocket.Close();
 		}
-
-		private static void HandleRequest()
-		{
-			
-		}
-
-
 	}
 }
 

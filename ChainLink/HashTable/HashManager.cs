@@ -1,9 +1,9 @@
 ﻿using System;
 namespace DHTSharp
 {
-	public class RoutingTable
+	public class HashManager
 	{
-		public RoutingTable()
+		public HashManager()
 		{
 		}
 	}

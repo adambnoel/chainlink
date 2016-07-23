@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainLinkServer", "ChainLin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainLinkCLI", "ChainLinkCLI\ChainLinkCLI.csproj", "{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainLinkServerTest", "ChainLinkServerTest\ChainLinkServerTest.csproj", "{9F8C7697-5985-4A3B-949D-66E6ECD43A12}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -19,5 +21,9 @@ Global
 		{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}.Debug|x86.Build.0 = Debug|x86
 		{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}.Release|x86.ActiveCfg = Release|x86
 		{F0B4C96F-346D-487C-A9A1-69ACC8C7FB4E}.Release|x86.Build.0 = Release|x86
+		{9F8C7697-5985-4A3B-949D-66E6ECD43A12}.Debug|x86.ActiveCfg = Debug|x86
+		{9F8C7697-5985-4A3B-949D-66E6ECD43A12}.Debug|x86.Build.0 = Debug|x86
+		{9F8C7697-5985-4A3B-949D-66E6ECD43A12}.Release|x86.ActiveCfg = Release|x86
+		{9F8C7697-5985-4A3B-949D-66E6ECD43A12}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 EndGlobal
