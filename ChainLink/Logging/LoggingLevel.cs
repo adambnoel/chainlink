@@ -6,8 +6,8 @@ namespace DHTSharp
 		CRITICAL,
 		ERROR,
 		WARNING,
-		DEBUGGING,
-		VERBOSE
+		VERBOSE,
+		DEBUGGING
 	}
 }
 

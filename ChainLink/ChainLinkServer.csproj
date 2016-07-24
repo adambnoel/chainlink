@@ -37,8 +37,6 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HashFunction\IHashFunction.cs" />
-    <Compile Include="HashFunction\SHA1HashFunction.cs" />
     <Compile Include="KeyspacePartitioning\IKeyspacePartitioningMethod.cs" />
     <Compile Include="Node\Node.cs" />
     <Compile Include="Requests\GetRequest.cs" />
@@ -72,10 +70,11 @@
     <Compile Include="RequestProcessors\LeaveRequestProcessor.cs" />
     <Compile Include="RequestProcessors\PingRequestProcessor.cs" />
     <Compile Include="RequestProcessors\GossipRequestProcessor.cs" />
+    <Compile Include="HashTable\IHashTable.cs" />
+    <Compile Include="HashTable\ConcurrentHashTable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="HashFunction\" />
     <Folder Include="KeyspacePartitioning\" />
     <Folder Include="Node\" />
     <Folder Include="Requests\" />
