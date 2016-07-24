@@ -24,32 +24,7 @@ namespace DHTSharp
 			hashFunctionRange = HashFunctionRange;
 		}
 
-		public static String Serialize(Ring inputRing)
-		{
-			XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
-			DataSet ringData = new DataSet();
-			Stream dataStream = new MemoryStream();
 
-			ringData.Tables.Add(Ring.convertRingToDataTable(inputRing));
-			serializer.Serialize(dataStream, ringData);
-			String serializedNode = dataStream.ToString();
-			dataStream.Close();
-			return serializedNode;
-		}
-
-
-		public static String Serialize(Ring inputRing)
-		{
-			String serializedRing = String.Empty;
-
-			return String.Empty;
-		}
-
-		public static Ring Deserialize(String serializedRing)
-		{
-			
-			return new Ring("", "", 0);
-		}
 
 		public BigInteger GetHashkeyDistance(String hashKey)
 		{
@@ -117,18 +92,52 @@ namespace DHTSharp
 			return (hashKey + hashFunctionMaxValue);
 		}
 
+		public static String Serialize(Ring inputRing)
+		{
+			XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
+			DataSet ringData = new DataSet();
+			Stream dataStream = new MemoryStream();
+
+			ringData.Tables.Add(Ring.convertRingToDataTable(inputRing));
+			serializer.Serialize(dataStream, ringData);
+			String serializedNode = dataStream.ToString();
+			dataStream.Close();
+			return serializedNode;
+		}
+
+		public static Ring Deserialize(String serializedRing)
+		{
+			XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
+			DataSet ringData = new DataSet();
+			Stream dataStream = new MemoryStream();
+			byte[] serializedRingBytes = Encoding.ASCII.GetBytes(serializedRing);
+			dataStream.Read(serializedRingBytes, 0, serializedRingBytes.Length);
+
+			ringData = (DataSet)serializer.Deserialize(dataStream);
+			return convertDataTableToRing(ringData.Tables[0]);
+		}
+
 		private static DataTable convertRingToDataTable(Ring inputRing)
 		{
 			DataTable dt = new DataTable();
 			dt.Columns.Add("HashRangeStart");
 			dt.Columns.Add("HashRangeEnd");
-			dt.Columns.Add("hashFunctionRange");
+			dt.Columns.Add("HashFunctionRange");
 			DataRow dr = dt.NewRow();
 			dr["HashRangeStart"] = inputRing.hashRangeStart;
 			dr["HashRangeEnd"] = inputRing.hashRangeEnd;
-			dr["hashFunctionRange"] = inputRing.hashFunctionRange;
+			dr["HashFunctionRange"] = inputRing.hashFunctionRange;
 			dt.Rows.Add(dr);
 			return dt;
+		}
+
+		private static Ring convertDataTableToRing(DataTable inputDataTable)
+		{
+			DataRow dr = inputDataTable.Rows[0];
+			String hashRangeStart = dr["HashRangeStart"].ToString();
+			String hashRangeEnd = dr["HashRangeEnd"].ToString();
+			int hashFunctionRange = int.Parse(dr["HashFunctionRange"].ToString());
+			return new Ring(hashRangeStart, hashRangeEnd, hashFunctionRange);
 		}
 
 	}

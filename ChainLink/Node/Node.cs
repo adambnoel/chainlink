@@ -59,6 +59,7 @@ namespace DHTSharp
 			XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
 			DataSet nodeData = new DataSet();
 			Stream dataStream = new MemoryStream();
+			nodeData.Tables.Add(convertNodeToDataTable(inputNode));
 
 			serializer.Serialize(dataStream, nodeData);
 			String serializedNode = dataStream.ToString();
@@ -78,6 +79,40 @@ namespace DHTSharp
 			List<Ring> nodeRings = new List<Ring>();
 
 			return new Node(nodeRings, IPAddress.Parse(nodeData.Tables["NodeData"].Columns[""].ToString()), int.Parse(nodeData.Tables["NodeData"].Columns[""].ToString()));
+		}
+
+		private static DataTable convertNodeToDataTable(Node inputNode)
+		{
+			DataTable dt = new DataTable();
+			dt.Columns.Add("RingData");
+			dt.Columns.Add("NodeAddress");
+			dt.Columns.Add("NodeSocket");
+			DataRow row = dt.NewRow();
+			String serializedRings = String.Empty;
+			foreach (Ring r in inputNode.nodeDHTRings)
+			{
+				serializedRings = serializedRings + Ring.Serialize(r) + ";";
+			}
+			row["RingData"] = serializedRings;
+			row["NodeAddress"] = inputNode.nodeAddress.ToString();
+			row["NodeSocket"] = inputNode.nodeSocket.ToString();
+			dt.Rows.Add(row);
+			return dt;
+		}
+
+		private static Node convertDataTableToNode(DataTable dt)
+		{
+			List<Ring> nodeRings = new List<Ring>();
+			String serializedRings = dt.Rows[0]["RingData"].ToString();
+			String[] splitSerializedRings = serializedRings.Split(';');
+			for (int i = 0; i < splitSerializedRings.Length; i++)
+			{
+				Ring newRing = Ring.Deserialize(splitSerializedRings[i]);
+				nodeRings.Add(newRing);
+			}
+			String IPAddressString = dt.Rows[0]["NodeAddress"].ToString();
+			String SocketString = dt.Rows[0]["NodeSocket"].ToString();
+			return new Node(nodeRings, IPAddress.Parse(IPAddressString), int.Parse(SocketString));
 		}
 	}
 }
