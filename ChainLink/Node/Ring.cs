@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Net;
 using System.Numerics;
 using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace DHTSharp
 {
@@ -18,6 +23,20 @@ namespace DHTSharp
 			hashRangeEnd = HashRangeEnd;
 			hashFunctionRange = HashFunctionRange;
 		}
+
+		public static String Serialize(Ring inputRing)
+		{
+			XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
+			DataSet ringData = new DataSet();
+			Stream dataStream = new MemoryStream();
+
+			ringData.Tables.Add(Ring.convertRingToDataTable(inputRing));
+			serializer.Serialize(dataStream, ringData);
+			String serializedNode = dataStream.ToString();
+			dataStream.Close();
+			return serializedNode;
+		}
+
 
 		public static String Serialize(Ring inputRing)
 		{
@@ -96,6 +115,20 @@ namespace DHTSharp
 			}
 			hashFunctionMaxValue = hashFunctionMaxValue - 1;
 			return (hashKey + hashFunctionMaxValue);
+		}
+
+		private static DataTable convertRingToDataTable(Ring inputRing)
+		{
+			DataTable dt = new DataTable();
+			dt.Columns.Add("HashRangeStart");
+			dt.Columns.Add("HashRangeEnd");
+			dt.Columns.Add("hashFunctionRange");
+			DataRow dr = dt.NewRow();
+			dr["HashRangeStart"] = inputRing.hashRangeStart;
+			dr["HashRangeEnd"] = inputRing.hashRangeEnd;
+			dr["hashFunctionRange"] = inputRing.hashFunctionRange;
+			dt.Rows.Add(dr);
+			return dt;
 		}
 
 	}
