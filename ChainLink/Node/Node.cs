@@ -20,10 +20,6 @@ namespace DHTSharp
 			nodeAddress = NodeAddress;
 			nodeSocket = Socket;
 		}
-		public String Serialize()
-		{
-			return String.Empty;
-		}
 
 		public Boolean checkNodeRingsForKey(String hashKey)
 		{
@@ -52,6 +48,18 @@ namespace DHTSharp
 		{
 			failedPingCount = 0;
 		}
+
+		public static String Serialize(Node inputNode)
+		{
+			return String.Empty;
+		}
+
+		/**
+		public static Node Deserialize(String nodeString)
+		{
+			
+		}
+		**/
 	}
 }
 

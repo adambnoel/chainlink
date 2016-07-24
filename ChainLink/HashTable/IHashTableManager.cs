@@ -9,15 +9,15 @@ namespace DHTSharp
 	{
 		Boolean Run();
 		Boolean AddRequestHandler(ClientRequestHandler requestHandler);
-		Boolean RequestJoinNetwork(Node node);
-		Boolean RequestLeaveNetwork(Node node);
+		String RequestJoinNetwork(Node node);
+		String RequestLeaveNetwork(Node node);
 		Boolean AddNetworkNode(Node node);
 		Boolean RemoveNetworkNode(Node node);
-		Boolean PutKey(String key, String contents);
-		String GetValue(String key);
-		Boolean DeleteKey(String key);
-		List<String> GetKeySpace(String minKey, String maxKey);
-		Boolean DeleteKeySpace(String minKey, String maxKey);
+		String PutKey(String key, String contents, int kCount);
+		String GetValue(String key, int kCount);
+		String DeleteKey(String key, int kCount);
+		//List<String> GetKeySpace(String minKey, String maxKey);
+		//Boolean DeleteKeySpace(String minKey, String maxKey);
 	}
 }
 

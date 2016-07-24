@@ -22,7 +22,7 @@ namespace DHTSharp
 			StringBuilder sb = new StringBuilder();
 			sb.Append('$');
 			sb.Append("\r\n");
-			sb.Append(sourceNode.Serialize()); //Send details about the node that wants to join the network
+			sb.Append(Node.Serialize(sourceNode)); //Send details about the node that wants to join the network
 			sb.Append("\r\n");
 			return sb.ToString();
 		}

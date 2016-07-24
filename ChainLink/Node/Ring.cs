@@ -11,18 +11,25 @@ namespace DHTSharp
 		private String hashRangeStart;
 		private String hashRangeEnd;
 		private int hashFunctionRange;
-		private IHashTableManager hashTableManager;
-		public Ring(String HashRangeStart, String HashRangeEnd, int HashFunctionRange, IHashTableManager HashTableManager)
+
+		public Ring(String HashRangeStart, String HashRangeEnd, int HashFunctionRange)
 		{
 			hashRangeStart = HashRangeStart;
 			hashRangeEnd = HashRangeEnd;
 			hashFunctionRange = HashFunctionRange;
-			hashTableManager = HashTableManager;
 		}
-		public String Serialize()
+
+		public static String Serialize(Ring inputRing)
+		{
+			String serializedRing = String.Empty;
+
+			return String.Empty;
+		}
+
+		public static Ring Deserialize(String serializedRing)
 		{
 			
-			return String.Empty;
+			return new Ring("", "", 0);
 		}
 
 		public BigInteger GetHashkeyDistance(String hashKey)

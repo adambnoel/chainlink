@@ -63,6 +63,15 @@
     <Compile Include="Requests\GossipRequest.cs" />
     <Compile Include="Logging\CoreLogger.cs" />
     <Compile Include="Logging\LoggingLevel.cs" />
+    <Compile Include="RequestProcessors\IRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\JoinRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\GetRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\DeleteRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\PutRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\ErrorRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\LeaveRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\PingRequestProcessor.cs" />
+    <Compile Include="RequestProcessors\GossipRequestProcessor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -74,6 +83,7 @@
     <Folder Include="HashTable\" />
     <Folder Include="Logging\" />
     <Folder Include="DiskManager\" />
+    <Folder Include="RequestProcessors\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

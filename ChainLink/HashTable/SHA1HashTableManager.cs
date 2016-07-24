@@ -6,7 +6,7 @@ using System.Threading;
 namespace DHTSharp
 {
 	//This class
-	public class SHA1HashTableManager
+	public class SHA1HashTableManager : IHashTableManager
 	{
 		private Node currentNode;
 		private Semaphore networkNodeLock = new Semaphore(1, 1);
@@ -42,16 +42,47 @@ namespace DHTSharp
 			return true;
 		}
 
-		public Boolean RequestJoinNetwork(Node node)
+		public String RequestJoinNetwork(Node node)
 		{
 			//A node
 
-			return true;
+			return "";
 		}
 
-		public Boolean RequestLeaveNetwork(Node node)
+		public String RequestLeaveNetwork(Node node)
 		{
-			return true;
+			return "";
+		}
+
+		public String DeleteKey(String key, int kCount)
+		{
+			//Hash key
+			//Check if current node has key
+			//If node has key -> delete from local hashtable
+			//Propagate 
+			return "";
+		}
+
+		public String GetValue(String key, int kCount)
+		{
+			//Hash key
+			//Check if the current node has key
+			//If node has key -> request from local hashtable
+			//Local hashtable checks if value is in memory or on disk
+			//If in memory -> Retrieve
+			//If not -> Load from disk
+			//If node doesn't have key -> finding node closest to key
+			//Send get request to relevant node -> Parse response
+			//Done!
+			//Reader writer problem??
+
+			return "";
+		}
+
+		public String PutKey(String key, String contents, int kCount)
+		{
+
+			return "";
 		}
 
 		public Boolean AddNetworkNode(Node node)
