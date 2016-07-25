@@ -13,10 +13,10 @@ namespace DHTSharp
 		private TcpClient connectedClient;
 		private DateTime lastRequestTime = DateTime.UtcNow;
 		private Boolean isActive = true;
-		private IHashTableManager tableManager;
+		private HashTableManager tableManager;
 		private Thread clientThread;
 
-		public void Start(TcpClient Client, IHashTableManager TableManager)
+		public void Start(TcpClient Client, HashTableManager TableManager)
 		{
 			connectedClient = Client;
 			tableManager = TableManager;

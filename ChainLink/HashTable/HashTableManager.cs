@@ -6,7 +6,7 @@ using System.Threading;
 namespace DHTSharp
 {
 	//This class
-	public class SHA1HashTableManager : IHashTableManager
+	public class HashTableManager
 	{
 		private Node currentNode;
 		private Semaphore networkNodeLock = new Semaphore(1, 1);
@@ -21,7 +21,7 @@ namespace DHTSharp
 		private Semaphore clientRequestHandlerLock = new Semaphore(1, 1);
 		private List<ClientRequestHandler> clientRequestHandlers = new List<ClientRequestHandler>();
 
-		public SHA1HashTableManager(Node CurrentNode, List<Node> NetworkNodes)
+		public HashTableManager(Node CurrentNode, List<Node> NetworkNodes)
 		{
 			currentNode = CurrentNode;
 			networkNodes = NetworkNodes;

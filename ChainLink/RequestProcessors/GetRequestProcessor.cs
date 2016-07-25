@@ -3,11 +3,11 @@ namespace DHTSharp
 {
 	public class GetRequestProcessor : IRequestProcessor
 	{
-		private IHashTableManager tableManager;
+		private HashTableManager tableManager;
 		private String requestKey;
 		private int kCount = 1;
 
-		public GetRequestProcessor(IHashTableManager TableManager, String GetRequest)
+		public GetRequestProcessor(HashTableManager TableManager, String GetRequest)
 		{
 			tableManager = TableManager;
 			String[] splitGetRequest = GetRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);

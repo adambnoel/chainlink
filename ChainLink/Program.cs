@@ -15,8 +15,9 @@ namespace DHTSharp
 	{
 		public static void Main (string[] args)
 		{
+			//Initialize the logger
 			String logFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("FilePath"), ConfigurationManager.AppSettings.Get("FileName"));
-			CoreLogger logger = new CoreLogger(ConfigurationManager.AppSettings.Get(logFilePath));
+			CoreLogger logger = new CoreLogger(logFilePath);
 			String logLevelString = ConfigurationManager.AppSettings.Get("LoggingLevel");
 			LoggingLevel loggingLevel = LoggingLevel.CRITICAL;
 			switch (logLevelString)
@@ -40,19 +41,44 @@ namespace DHTSharp
 			logger.SetLoggingLevel(loggingLevel);
 			logger.Log("ChainLink node started at: " + DateTime.UtcNow, LoggingLevel.VERBOSE);
 
+			//Configure current node -> Given that the node was offline
+			//You do not know what your keyrange is
+			List<Ring> localNodeRings = new List<Ring>();
+			Node currentNode = new Node(localNodeRings, IPAddress.Parse(ConfigurationManager.AppSettings.Get("IPAddress")), int.Parse(ConfigurationManager.AppSettings.Get("PortNumber")));
+
+
+
+			//Check for configuration xml -> If found try and connect to old network
+			//If not -> Start as a new DHT network
+			try
+			{
+				String xmlFile;
+				using (StreamReader r = new StreamReader(ConfigurationManager.AppSettings.Get("ConfigurationXmlFile")))
+				{
+					xmlFile = r.ReadToEnd();
+				}
+
+				logger.Log("Loaded network configuration", LoggingLevel.VERBOSE);
+			}
+			catch (Exception e)
+			{
+				logger.Log("Couldn't find log file", LoggingLevel.VERBOSE);
+				logger.Log("Started new DHT", LoggingLevel.VERBOSE);
+				int numRings = int.Parse(ConfigurationManager.AppSettings.Get("NumberOfRings"));
+				for (int i = 0; i < numRings; i++)
+				{
+					
+				}
+
+			}
+			finally
+			{
+
+			}
 
 
 			//Application configured -> Start up main loop
-			IPAddress address = IPAddress.Parse(ConfigurationManager.AppSettings.Get("IPAddress"));
-			int portNumber = 0;
-			int.TryParse(ConfigurationManager.AppSettings.Get("PortNumber"), out portNumber);
-			if (portNumber == 0)
-			{
-				logger.Log("Invalid port number provided in app.config, defaulting to 8386.", LoggingLevel.WARNING);
-				return;
-			}
-
-			TcpListener serverSocket = new TcpListener(address, portNumber);
+			TcpListener serverSocket = new TcpListener(currentNode.GetIPAddress(), currentNode.GetNodeSocket());
 			TcpClient clientSocket = default(TcpClient);
 			serverSocket.Start();
 
@@ -60,7 +86,6 @@ namespace DHTSharp
 			{
 				clientSocket = serverSocket.AcceptTcpClient();
 				ClientRequestHandler requestHandler = new ClientRequestHandler();
-
 				//requestHandler.Start(clientSocket);
 
 

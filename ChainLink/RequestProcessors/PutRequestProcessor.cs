@@ -3,12 +3,12 @@ namespace DHTSharp
 {
 	public class PutRequestProcessor : IRequestProcessor
 	{
-		private IHashTableManager tableManager;
+		private HashTableManager tableManager;
 		private String requestKey;
 		private String requestBody;
 		private int kCount = 1;
 
-		public PutRequestProcessor(IHashTableManager TableManager, String PutRequest)
+		public PutRequestProcessor(HashTableManager TableManager, String PutRequest)
 		{
 			tableManager = TableManager;
 			String[] splitPutRequest = PutRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);

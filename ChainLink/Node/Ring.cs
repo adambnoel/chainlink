@@ -112,7 +112,6 @@ namespace DHTSharp
 			Stream dataStream = new MemoryStream();
 			byte[] serializedRingBytes = Encoding.ASCII.GetBytes(serializedRing);
 			dataStream.Read(serializedRingBytes, 0, serializedRingBytes.Length);
-
 			ringData = (DataSet)serializer.Deserialize(dataStream);
 			return convertDataTableToRing(ringData.Tables[0]);
 		}

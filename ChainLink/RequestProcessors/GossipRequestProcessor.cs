@@ -4,8 +4,8 @@ namespace DHTSharp
 	public class GossipRequestProcessor : IRequestProcessor
 	{
 		private String requestString;
-		private IHashTableManager tableManager;
-		public GossipRequestProcessor(IHashTableManager TableManager, String RequestString)
+		private HashTableManager tableManager;
+		public GossipRequestProcessor(HashTableManager TableManager, String RequestString)
 		{
 			requestString = RequestString;
 			tableManager = TableManager;

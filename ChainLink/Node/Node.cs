@@ -26,6 +26,21 @@ namespace DHTSharp
 			nodeSocket = Socket;
 		}
 
+		public void AddRing(Ring r)
+		{
+			nodeDHTRings.Add(r);
+		}
+
+		public IPAddress GetIPAddress()
+		{
+			return nodeAddress;
+		}
+
+		public int GetNodeSocket()
+		{
+			return nodeSocket;
+		}
+
 		public Boolean checkNodeRingsForKey(String hashKey)
 		{
 			foreach (Ring r in nodeDHTRings)

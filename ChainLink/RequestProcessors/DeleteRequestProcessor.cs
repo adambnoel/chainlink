@@ -3,11 +3,11 @@ namespace DHTSharp
 {
 	public class DeleteRequestProcessor : IRequestProcessor
 	{
-		private IHashTableManager tableManager;
+		private HashTableManager tableManager;
 		private String requestKey;
 		private int kCount = 1;
 
-		public DeleteRequestProcessor(IHashTableManager TableManager, String DeleteRequest)
+		public DeleteRequestProcessor(HashTableManager TableManager, String DeleteRequest)
 		{
 			tableManager = TableManager;
 			String[] splitDeleteRequest = DeleteRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);

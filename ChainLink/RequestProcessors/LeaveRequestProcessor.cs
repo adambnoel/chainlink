@@ -3,10 +3,10 @@ namespace DHTSharp
 {
 	public class LeaveRequestProcessor : IRequestProcessor
 	{
-		private IHashTableManager tableManager;
+		private HashTableManager tableManager;
 		private Node leavingNode;
 
-		public LeaveRequestProcessor(IHashTableManager TableManager, String LeaveRequest)
+		public LeaveRequestProcessor(HashTableManager TableManager, String LeaveRequest)
 		{
 			tableManager = TableManager;
 			//Serialize node from request

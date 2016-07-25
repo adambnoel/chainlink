@@ -10,13 +10,14 @@ namespace DHTSharp
 		private LoggingLevel currentLevel;
 		private StreamWriter f;
 		private Timer flushTimer;
-		private Queue<String> LogQueue;
+		private Queue<String> LogQueue = new Queue<string>();
 
 		public CoreLogger(String FilePath)
 		{
 			f = new StreamWriter(FilePath);
 			currentLevel = LoggingLevel.CRITICAL; //Critical by default
 			flushTimer = new Timer(emptyQueueTask, this, 10 * 1000, 10 * 1000);
+
 			f.WriteLine("New logging session started at: " + DateTime.UtcNow);
 		}
 
@@ -43,11 +44,20 @@ namespace DHTSharp
 
 		private void emptyQueueTask(object state)
 		{
+			
 			while (LogQueue.Count != 0)
 			{
-				String queuedText = LogQueue.Dequeue();
-				f.WriteLine(queuedText);
+				try
+				{
+					String queuedText = LogQueue.Dequeue();
+					f.WriteLine(queuedText);
+				}
+				catch
+				{
+
+				}
 			}
+			f.Flush();
 		}
 
 	}
