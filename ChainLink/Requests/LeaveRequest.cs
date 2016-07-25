@@ -7,7 +7,7 @@ namespace DHTSharp
 		{
 		}
 
-		public String ProcessRequest()
+		public String Process()
 		{
 			return "";
 		}

@@ -5,15 +5,21 @@ using System.Threading;
 
 namespace DHTSharp
 {
-	public class ConcurrentHashTable : IHashTable
+	public class ConcurrentHashTable
 	{
 		private Semaphore newKeySemaphore = new Semaphore(1, 1);
 		private Dictionary<string, string> concurrentHashTable = new Dictionary<string, string>();
 		private Dictionary<string, Semaphore> concurrentHashTableLocks = new Dictionary<string, Semaphore>();
+		private int keyRangeBits = 32; //32 bit integer
 
 		public Boolean LockKey(String Key)
 		{
 			return true;
+		}
+
+		public int GetKeyRangeBits()
+		{
+			return keyRangeBits;
 		}
 
 		public Boolean UnlockKey(String Key)

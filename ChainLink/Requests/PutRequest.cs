@@ -11,7 +11,7 @@ namespace DHTSharp
 			key = requestKey;
 			body = requestBody;
 		}
-		public String ProcessRequest()
+		public String Process()
 		{
 			return String.Empty;
 		}

@@ -15,6 +15,9 @@ namespace DHTSharp
 	{
 		public static void Main (string[] args)
 		{
+
+			//HashTableManager manager = new HashTableManager();
+
 			//Initialize the logger
 			String logFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("FilePath"), ConfigurationManager.AppSettings.Get("FileName"));
 			CoreLogger logger = new CoreLogger(logFilePath);
@@ -45,7 +48,6 @@ namespace DHTSharp
 			//You do not know what your keyrange is
 			List<Ring> localNodeRings = new List<Ring>();
 			Node currentNode = new Node(localNodeRings, IPAddress.Parse(ConfigurationManager.AppSettings.Get("IPAddress")), int.Parse(ConfigurationManager.AppSettings.Get("PortNumber")));
-
 
 
 			//Check for configuration xml -> If found try and connect to old network

@@ -9,10 +9,11 @@ namespace DHTSharp
 			targetNode = TargetNode;
 		}
 
-		public String ProcessRequest()
+		public String Process()
 		{
 			return "";
 		}
+
 	}
 }
 

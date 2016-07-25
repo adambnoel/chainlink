@@ -11,16 +11,14 @@ namespace DHTSharp
 			requestText = inputRequestText;
 		}
 
-		public String ProcessRequest()
+		public String Process()
 		{
-			StringBuilder sb = new StringBuilder();
-			sb.Append("!");
-			sb.Append("\r\n");
-			sb.Append("Failed to process request: ");
-			sb.Append(requestText);
-			sb.Append(". Invalid request format.");
-			sb.Append("\r\n");
-			return sb.ToString();
+			String responseString = String.Empty;
+			responseString = responseString + "!\r\n";
+			responseString = responseString + "Failed to process request: ";
+			responseString = responseString + requestText;
+			responseString = responseString + ". Invalid request format. \r\n";
+			return responseString;
 		}
 	}
 }

@@ -42,20 +42,16 @@ namespace DHTSharp
 			LogQueue.Enqueue("Changing logging level to: " + TargetLoggingLevel);
 		}
 
+		//TODO: The try-catch statement is a workaround for timer spawning multiple threads
 		private void emptyQueueTask(object state)
 		{
-			
 			while (LogQueue.Count != 0)
 			{
 				try
 				{
 					String queuedText = LogQueue.Dequeue();
 					f.WriteLine(queuedText);
-				}
-				catch
-				{
-
-				}
+				} finally { }
 			}
 			f.Flush();
 		}

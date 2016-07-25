@@ -44,7 +44,6 @@
     <Compile Include="Requests\GetRequest.cs" />
     <Compile Include="Requests\PutRequest.cs" />
     <Compile Include="Requests\DeleteRequest.cs" />
-    <Compile Include="Requests\RequestParser.cs" />
     <Compile Include="KeyspacePartitioning\Keyspace.cs" />
     <Compile Include="ClientRequestHandler.cs" />
     <Compile Include="Requests\IRequest.cs" />
@@ -66,7 +65,6 @@
     <Compile Include="RequestProcessors\LeaveRequestProcessor.cs" />
     <Compile Include="RequestProcessors\PingRequestProcessor.cs" />
     <Compile Include="RequestProcessors\GossipRequestProcessor.cs" />
-    <Compile Include="HashTable\IHashTable.cs" />
     <Compile Include="HashTable\ConcurrentHashTable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

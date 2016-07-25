@@ -17,14 +17,16 @@ namespace DHTSharp
 		private Timer connectionCheckTimer;
 		private Timer maintenanceTimer;
 
-
 		private Semaphore clientRequestHandlerLock = new Semaphore(1, 1);
 		private List<ClientRequestHandler> clientRequestHandlers = new List<ClientRequestHandler>();
 
-		public HashTableManager(Node CurrentNode, List<Node> NetworkNodes)
+		ConcurrentHashTable localHashTable;
+
+		public HashTableManager(Node CurrentNode, List<Node> NetworkNodes, ConcurrentHashTable hashTableImplementation)
 		{
 			currentNode = CurrentNode;
 			networkNodes = NetworkNodes;
+			localHashTable = hashTableImplementation;
 		}
 
 		public Boolean Run()
@@ -103,7 +105,7 @@ namespace DHTSharp
 			foreach (Node node in networkNodes)
 			{
 				PingRequest newPingRequest = new PingRequest(node);
-				if (newPingRequest.ProcessRequest() != "OK\r\n")
+				if (newPingRequest.Process() != "OK\r\n")
 				{
 					if (node.FailedNodePulse())
 					{

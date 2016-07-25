@@ -41,12 +41,11 @@ namespace DHTSharp
 			return nodeSocket;
 		}
 
-		public Boolean checkNodeRingsForKey(String hashKey)
+		public Boolean checkNodeRingsForKey(int hashKey)
 		{
 			foreach (Ring r in nodeDHTRings)
 			{
-				BigInteger distance = r.GetHashkeyDistance(hashKey);
-				if (distance == 0) //Distance is 0 -> key on this ring
+				if (r.CheckRingForKey(hashKey))
 				{
 					return true;
 				}

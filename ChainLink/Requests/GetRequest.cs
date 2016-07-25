@@ -1,25 +1,30 @@
 ﻿using System;
+using System.Text;
 namespace DHTSharp
 {
 	public class GetRequest : IRequest
 	{
-		private string key;
-		public GetRequest(String requestKey)
+		private String requestKey;
+		public GetRequest(String key)
 		{
-			key = requestKey;
+			requestKey = key;
 		}
 
-		/**
-		 * 
-		 * First, contact local node to see if requestKey is present
-		 * If key not present -> send request to network component
-		 * If key present in one-hop node -> request from node
-		 * If not present -> calculate closest node distance
-		 * */
-		public String ProcessRequest()
+		public String Process()
 		{
-			
-			return String.Empty;
+			//CLIConfigManager configManager = new CLIConfigManager();
+			//TcpRequest request = new TcpRequest(configManager.GetIPAddress(), configManager.GetPortNumber(), configManager.GetMaxRequestSize());
+			//String response = request.Send(initializeGetRequest());
+
+			return "";
+		}
+
+		private String initializeGetRequest()
+		{
+			String getRequest = String.Empty;
+			getRequest = getRequest + "*\r\n";
+			getRequest = getRequest + requestKey + "\r\n";
+			return getRequest;
 		}
 	}
 }

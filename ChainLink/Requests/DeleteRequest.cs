@@ -9,7 +9,7 @@ namespace DHTSharp
 			key = requestKey;
 		}
 
-		public String ProcessRequest()
+		public String Process()
 		{
 			return String.Empty;
 		}
