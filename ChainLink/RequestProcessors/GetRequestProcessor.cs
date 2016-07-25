@@ -5,26 +5,17 @@ namespace DHTSharp
 	{
 		private HashTableManager tableManager;
 		private String requestKey;
-		private int kCount = 1;
 
 		public GetRequestProcessor(HashTableManager TableManager, String GetRequest)
 		{
 			tableManager = TableManager;
 			String[] splitGetRequest = GetRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 			requestKey = splitGetRequest[1];
-			if (splitGetRequest.Length > 2)
-			{
-				int newKCount = 0;
-				if (int.TryParse(splitGetRequest[2], out newKCount))
-				{
-					kCount = newKCount;
-				}
-			}
 		}
 
 		public String ProcessAndRespond()
 		{
-			String value = tableManager.GetValue(requestKey, kCount);
+			String value = tableManager.GetValue(requestKey);
 			return generateResponse(value);
 		}
 

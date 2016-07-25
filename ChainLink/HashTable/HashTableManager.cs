@@ -54,7 +54,7 @@ namespace DHTSharp
 			return "";
 		}
 
-		public String DeleteKey(String key, int kCount)
+		public String DeleteKey(String key)
 		{
 			//Hash key
 			//Check if current node has key
@@ -63,7 +63,7 @@ namespace DHTSharp
 			return "";
 		}
 
-		public String GetValue(String key, int kCount)
+		public String GetValue(String key)
 		{
 			//Hash key
 			//Check if the current node has key
@@ -79,7 +79,7 @@ namespace DHTSharp
 			return "";
 		}
 
-		public String PutKey(String key, String contents, int kCount)
+		public String PutKey(String key, String contents)
 		{
 
 			return "";

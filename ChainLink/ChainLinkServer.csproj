@@ -42,15 +42,12 @@
     <Compile Include="KeyspacePartitioning\IKeyspacePartitioningMethod.cs" />
     <Compile Include="Node\Node.cs" />
     <Compile Include="Requests\GetRequest.cs" />
-    <Compile Include="Requests\KGetRequest.cs" />
     <Compile Include="Requests\PutRequest.cs" />
-    <Compile Include="Requests\KPutRequest.cs" />
     <Compile Include="Requests\DeleteRequest.cs" />
     <Compile Include="Requests\RequestParser.cs" />
     <Compile Include="KeyspacePartitioning\Keyspace.cs" />
     <Compile Include="ClientRequestHandler.cs" />
     <Compile Include="Requests\IRequest.cs" />
-    <Compile Include="Requests\KDeleteRequest.cs" />
     <Compile Include="Requests\ErrorRequest.cs" />
     <Compile Include="DiskManager\IDataStorage.cs" />
     <Compile Include="DiskManager\OSxDiskManager.cs" />
