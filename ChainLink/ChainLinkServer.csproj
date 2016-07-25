@@ -49,8 +49,6 @@
     <Compile Include="ClientRequestHandler.cs" />
     <Compile Include="Requests\IRequest.cs" />
     <Compile Include="Requests\ErrorRequest.cs" />
-    <Compile Include="DiskManager\IDataStorage.cs" />
-    <Compile Include="DiskManager\OSxDiskManager.cs" />
     <Compile Include="Node\Ring.cs" />
     <Compile Include="HashTable\HashTableManager.cs" />
     <Compile Include="Requests\JoinRequest.cs" />
@@ -79,7 +77,6 @@
     <Folder Include="Networking\" />
     <Folder Include="HashTable\" />
     <Folder Include="Logging\" />
-    <Folder Include="DiskManager\" />
     <Folder Include="RequestProcessors\" />
   </ItemGroup>
   <ItemGroup>
