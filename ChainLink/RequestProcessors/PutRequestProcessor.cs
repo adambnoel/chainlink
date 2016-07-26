@@ -22,16 +22,19 @@ namespace DHTSharp
 
 		private String generateResponse(String requestResult)
 		{
-			String response = "+\r\n";
+
 			if (requestResult == "OK")
 			{
+				String response = "+\r\n";
 				response = response + "OK\r\n";
+				return response;
 			}
 			else 
 			{
+				String response = "!\r\n";
 				response = response + requestResult + "\r\n";
+				return response;
 			}
-			return response;
 		}
 	}
 }

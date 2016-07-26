@@ -130,8 +130,6 @@ namespace DHTSharp
 					requestProcessor = new ErrorRequestProcessor(requestString);
 				}
 			}
-
-
 			return (requestProcessor != null ? requestProcessor.ProcessAndRespond() : "");
 		}
 	}

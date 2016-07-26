@@ -120,11 +120,11 @@ namespace DHTSharp
 			{
 				if (hashTableWrapper.Put(key, Encoding.ASCII.GetBytes(contents)))
 				{
-					return "OK\r\n";
+					return "OK";
 				}
 				else
 				{
-					return "ERROR - Failed to put key\r\n";
+					return "ERROR - Failed to put key";
 				}
 			}
 			else 
@@ -133,10 +133,11 @@ namespace DHTSharp
 				{
 					if (networkNodes[i].CheckNodeRingsForKey(key.GetHashCode()))
 					{
-						PutRequest p = new PutRequest(key, contents, networkNodes[i]);
+						PutRequest putRequest = new PutRequest(key, contents, networkNodes[i]);
+						return putRequest.Process();
 					}
 				}
-				return "ERROR - Failed t find key\r\n";
+				return "ERROR - Failed to find key";
 			}
 		}
 

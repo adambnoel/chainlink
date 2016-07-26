@@ -64,7 +64,7 @@ namespace DHTSharp
 
 				logger.Log("Loaded network configuration", LoggingLevel.VERBOSE);
 			}
-			catch (Exception e)
+			catch
 			{
 				logger.Log("Couldn't find log file", LoggingLevel.VERBOSE);
 				logger.Log("Started new DHT", LoggingLevel.VERBOSE);
@@ -105,6 +105,26 @@ namespace DHTSharp
 			{
 				clientSocket = serverSocket.AcceptTcpClient();
 				ClientRequestHandler requestHandler = new ClientRequestHandler();
+				requestHandler.Start(clientSocket, manager, logger);
+				//requestHandler.Start(clientSocket);
+
+
+				/**
+				NetworkStream networkStream = clientSocket.GetStream();
+				byte[] bytesFrom = new byte[2000000];
+				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
+
+				String clientData = System.Text.Encoding.ASCII.GetString(bytesFrom);
+				clientData = clientData.Substring(0, clientData.LastIndexOf("\r\n", StringComparison.Ordinal));
+				Console.WriteLine("Received request from client");
+				**/
+
+				//Console.WriteLine(" >> Data from client - " + dataFromClient);
+				//string serverResponse = "Last Message from client" + dataFromClient;
+				//Byte[] sendBytes = Encoding.ASCII.GetBytes(serverResponse);
+				//networkStream.Write(sendBytes, 0, sendBytes.Length);
+				//networkStream.Flush();
+				//Console.WriteLine(" >> " + serverResponse);
 			}
 
 			serverSocket.Stop();
