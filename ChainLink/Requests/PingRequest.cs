@@ -11,7 +11,16 @@ namespace DHTSharp
 
 		public String Process()
 		{
-			return "";
+			TcpRequest request = new TcpRequest(targetNode.GetIPAddress(), targetNode.GetNodeSocket());
+			return request.Send(initializePingRequest());
+		}
+
+		private String initializePingRequest()
+		{
+			String pingRequest = String.Empty;
+			pingRequest = pingRequest + "@\r\n";
+			pingRequest = pingRequest + DateTime.UtcNow + "\r\n";
+			return pingRequest;
 		}
 
 	}

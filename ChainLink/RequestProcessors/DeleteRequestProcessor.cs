@@ -21,13 +21,16 @@ namespace DHTSharp
 
 		private String generateResponse(String requestResult)
 		{
-			String response = "-\r\n";
+			String response = "";
 			if (requestResult == "OK")
 			{
+				response = response + "-\r\n";
 				response = response + "OK\r\n";
+				response = response + "Deleted key: " + requestKey + "\r\n";
 			}
 			else 
 			{
+				response = "!\r\n";
 				response = response + requestResult + "\r\n";
 			}
 			return response;

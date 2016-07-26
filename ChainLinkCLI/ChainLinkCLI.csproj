@@ -39,8 +39,6 @@
     <Compile Include="CLIParser.cs" />
     <Compile Include="Requests\DeleteRequest.cs" />
     <Compile Include="Requests\GetRequest.cs" />
-    <Compile Include="Requests\KGetRequest.cs" />
-    <Compile Include="Requests\KPutRequest.cs" />
     <Compile Include="Requests\PutRequest.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\RequestCommand.cs" />
@@ -52,7 +50,6 @@
     <Compile Include="Requests\IRequest.cs" />
     <Compile Include="Requests\RequestFactory.cs" />
     <Compile Include="CLIConfigManager.cs" />
-    <Compile Include="Requests\KDeleteRequest.cs" />
     <Compile Include="Requests\ErrorRequest.cs" />
     <Compile Include="Commands\ExitCommand.cs" />
   </ItemGroup>
@@ -60,6 +57,7 @@
     <Folder Include="Requests\" />
     <Folder Include="Commands\" />
     <Folder Include="Network\" />
+    <Folder Include="Configuration\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

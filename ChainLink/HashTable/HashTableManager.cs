@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -11,6 +12,11 @@ namespace DHTSharp
 		private Node currentNode;
 		private Semaphore networkNodeLock = new Semaphore(1, 1);
 		private List<Node> networkNodes = new List<Node>();
+
+		private Queue<Node> recentNodePings = new Queue<Node>();
+		private Timer updateNodeTimer;
+		private Queue<Node> newNodes = new Queue<Node>();
+		private Timer newNodeTimer;
 
 		private Timer pingTimer;
 		private Timer gossipTimer;
@@ -44,6 +50,23 @@ namespace DHTSharp
 		{
 			clientRequestHandlers.Add(clientRequestHandler);
 			return true;
+		}
+
+		public void PingNetworkNode(Node sourceNode)
+		{
+
+			Node relevantNode = (from x in networkNodes
+								 where x.GetIPAddress().Equals(sourceNode.GetIPAddress())
+								 && x.GetHashCode().Equals(sourceNode.GetHashCode())
+								 select x).FirstOrDefault();
+			if (relevantNode != null)
+			{
+				recentNodePings.Enqueue(sourceNode);
+			}
+			else 
+			{
+				newNodes.Enqueue(sourceNode);
+			}
 		}
 
 		public String RequestJoinNetwork(Node node)
@@ -91,7 +114,7 @@ namespace DHTSharp
 			if (currentNode.CheckNodeRingsForKey(key.GetHashCode()))
 			{
 				valueBytes = hashTableWrapper.Get(key);
-				if (valueBytes.Length == 0)
+				if (valueBytes == null || valueBytes.Length == 0)
 				{
 					return "";
 				}
@@ -153,22 +176,43 @@ namespace DHTSharp
 			return true;
 		}
 
+		private void newNodeTask(Object state)
+		{
+			while (newNodes.Count != 0)
+			{
+				try
+				{
+
+				}
+				catch (Exception e)
+				{
+
+				}
+			}
+		}
+
+		private void updateNodeTask(Object state)
+		{
+			while (recentNodePings.Count != 0)
+			{
+				try
+				{
+					Node pingSourceNode = recentNodePings.Dequeue();
+
+				}
+				catch (Exception e)
+				{
+
+				}
+			}
+		}
+
 		private void pingTask(Object state)
 		{
 			logger.Log("Running ping task", LoggingLevel.DEBUGGING);
 			foreach (Node node in networkNodes)
 			{
 				PingRequest newPingRequest = new PingRequest(node);
-				if (newPingRequest.Process() != "OK\r\n")
-				{
-					if (node.FailedNodePulse())
-					{
-						//Assume the node has dropped
-					}
-				}
-				else {
-					node.ResetFailedPingCount();
-				}
 			}
 			logger.Log("Finished ping task", LoggingLevel.DEBUGGING);
 		}

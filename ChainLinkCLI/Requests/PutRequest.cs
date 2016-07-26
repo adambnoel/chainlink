@@ -35,7 +35,7 @@ namespace ChainLinkCLI
 
 		private void handleResponse(String response)
 		{
-
+			Console.WriteLine(response);
 		}
 	}
 }

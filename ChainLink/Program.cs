@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Configuration.Install;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace DHTSharp
 {
@@ -56,17 +54,34 @@ namespace DHTSharp
 			//Keyrange is unknown -> Will need to join once again
 			try
 			{
-				String xmlFile;
-				using (StreamReader r = new StreamReader(ConfigurationManager.AppSettings.Get("ConfigurationXmlFile")))
-				{
-					xmlFile = r.ReadToEnd();
-				}
+				XDocument networkFile = XDocument.Load(ConfigurationManager.AppSettings.Get("NetworkXmlFile"));
+				var networkNodes = networkFile.Root
+											  .Elements("SeedNodes")
+											  .Select(x => new Node(new List<Ring>(),
+															IPAddress.Parse((string)x.Attribute("ip")),
+															int.Parse((string)x.Attribute("port"))))
+				                              .ToList();
+				logger.Log("Parsed network file. Trying to join network", LoggingLevel.VERBOSE);
 
-				logger.Log("Loaded network configuration", LoggingLevel.VERBOSE);
+				Random random = new Random();
+				List<int> attemptedNodes = new List<int>();
+				do
+				{
+					int chosenNodeID = random.Next(0, networkNodes.Count);
+					Node chosenNode = networkNodes[chosenNodeID];
+					PingRequest pingRequest = new PingRequest(chosenNode);
+					String result = pingRequest.Process();
+					if (result == "OK")
+					{
+						break;
+					}
+
+				} while (attemptedNodes.Count != 0);
+
+				                                      
 			}
-			catch
+			catch (Exception e)
 			{
-				logger.Log("Couldn't find log file", LoggingLevel.VERBOSE);
 				logger.Log("Started new DHT", LoggingLevel.VERBOSE);
 				int numRings = int.Parse(ConfigurationManager.AppSettings.Get("NumberOfRings"));
 				for (int i = 0; i < numRings; i++)
@@ -74,7 +89,6 @@ namespace DHTSharp
 					Ring newRing = new Ring(int.MinValue, int.MaxValue);
 					localNodeRings.Add(newRing);
 				}
-
 			}
 			finally
 			{

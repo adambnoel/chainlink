@@ -3,17 +3,29 @@ namespace DHTSharp
 {
 	public class PingRequestProcessor : IRequestProcessor
 	{
-		private String requestString;
 		private HashTableManager tableManager;
-		public PingRequestProcessor(HashTableManager TableManager, String RequestString)
+		private Node sourceNode;
+
+		public PingRequestProcessor(HashTableManager TableManager, String RequestString, Node SourceNode)
 		{
-			requestString = RequestString;
+			String[] splitRequestString = RequestString.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 			tableManager = TableManager;
+			sourceNode = SourceNode;
+			sourceNode.SetLastPingTimeUtc(DateTime.Parse(splitRequestString[1]));
 		}
 
 		public String ProcessAndRespond()
 		{
-			return "";
+			tableManager.PingNetworkNode(sourceNode);
+			return generateResponse();
+		}
+
+		private String generateResponse()
+		{
+			String response = String.Empty;
+			response = "@\r\n";
+			response = response + DateTime.UtcNow + "\r\n";
+			return response;
 		}
 	}
 }

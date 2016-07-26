@@ -16,8 +16,7 @@ namespace DHTSharp
 		private List<Ring> nodeDHTRings;
 		private IPAddress nodeAddress;
 		private int nodeSocket;
-		private int failedPingCount = 0;
-		private int failedPingThreshold = 5;
+		private DateTime lastPingTimeUtc;
 
 		public Node (List<Ring> DHTRings, IPAddress NodeAddress, int Socket) 
 		{
@@ -39,6 +38,16 @@ namespace DHTSharp
 		public int GetNodeSocket()
 		{
 			return nodeSocket;
+		}
+
+		public DateTime GetLastPingTimeUtc()
+		{
+			return lastPingTimeUtc;
+		}
+
+		public void SetLastPingTimeUtc(DateTime newPingTime)
+		{
+			lastPingTimeUtc = newPingTime;
 		}
 
 		public Boolean CheckNodeRingsForKey(int hashKey)
@@ -67,16 +76,6 @@ namespace DHTSharp
 			return newRings;
 		}
 
-		public Boolean FailedNodePulse()
-		{
-			failedPingCount++;
-			if (failedPingCount >= failedPingThreshold)
-			{
-				return true;
-			}
-			return false;
-		}
-
 		private Tuple<int, int> splitHashcodeSpace(int HashcodeSpaceStart, int HashcodeSpaceEnd, Boolean TakeLowerHalf)
 		{
 			if (TakeLowerHalf)
@@ -89,10 +88,6 @@ namespace DHTSharp
 			}
 		}
 
-		public void ResetFailedPingCount()
-		{
-			failedPingCount = 0;
-		}
 
 		public static String Serialize(Node inputNode)
 		{

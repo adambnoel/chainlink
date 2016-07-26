@@ -27,6 +27,7 @@ namespace DHTSharp
 			{
 				String response = "+\r\n";
 				response = response + "OK\r\n";
+				response = response + "Put " + requestKey + "\r\n";
 				return response;
 			}
 			else 

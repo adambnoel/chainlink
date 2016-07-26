@@ -16,11 +16,16 @@ namespace DHTSharp
 		private HashTableManager tableManager;
 		private CoreLogger logger;
 		private Thread clientThread;
+		private IPAddress clientIPAddress;
+		private int clientSocket;
 
-		public void Start(TcpClient Client, HashTableManager TableManager, CoreLogger logger)
+		public void Start(TcpClient Client, HashTableManager TableManager, CoreLogger Logger)
 		{
+			logger = Logger;
 			logger.Log("Servicing new request", LoggingLevel.DEBUGGING);
 			connectedClient = Client;
+			clientIPAddress = ((IPEndPoint)connectedClient.Client.RemoteEndPoint).Address;
+			clientSocket = ((IPEndPoint)connectedClient.Client.RemoteEndPoint).Port;
 			tableManager = TableManager;
 			clientThread = new Thread(HandleRequest);
 			clientThread.Start();
@@ -52,26 +57,31 @@ namespace DHTSharp
 
 			while (isActive)
 			{
+				
 				NetworkStream networkStream = connectedClient.GetStream();
-				lastRequestTime = DateTime.UtcNow;
-				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
-				clientRequest = Encoding.ASCII.GetString(bytesFrom);
-				if (clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal) == -1) //Invalid request or connection closed
+				if (networkStream.CanRead)
 				{
-					logger.Log("Invalid request made", LoggingLevel.DEBUGGING);
-					string serverResponse = "ERROR\r\n Invalid request format";
-					bytesTo = Encoding.ASCII.GetBytes(serverResponse);
-					networkStream.Write(bytesTo, 0, bytesTo.Length);
-					networkStream.Flush();
-				}
-				else {
-					logger.Log("Servicing client request", LoggingLevel.VERBOSE);
-					clientRequest = clientRequest.Substring(0, clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal));
-					string serverResponse = parseRequestAndRespond(clientRequest);
-					bytesTo = Encoding.ASCII.GetBytes(serverResponse);
-					networkStream.Write(bytesTo, 0, bytesTo.Length);
-					networkStream.Flush();
-					logger.Log("Finished servicing client request", LoggingLevel.VERBOSE);
+					lastRequestTime = DateTime.UtcNow;
+					networkStream.Read(bytesFrom, 0, bytesFrom.Length);
+					clientRequest = Encoding.ASCII.GetString(bytesFrom);
+					if (clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal) == -1) //Invalid request or connection closed
+					{
+						logger.Log("Invalid request made", LoggingLevel.DEBUGGING);
+						string serverResponse = "ERROR\r\n Invalid request format";
+						bytesTo = Encoding.ASCII.GetBytes(serverResponse);
+						networkStream.Write(bytesTo, 0, bytesTo.Length);
+						networkStream.Flush();
+					}
+					else {
+						logger.Log("Servicing client request", LoggingLevel.VERBOSE);
+						clientRequest = clientRequest.Substring(0, clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal));
+						string serverResponse = parseRequestAndRespond(clientRequest);
+						bytesTo = Encoding.ASCII.GetBytes(serverResponse);
+						networkStream.Write(bytesTo, 0, bytesTo.Length);
+						networkStream.Flush();
+						networkStream.Close();
+						logger.Log("Finished servicing client request", LoggingLevel.VERBOSE);
+					}
 				}
 			}
 		}
@@ -113,7 +123,7 @@ namespace DHTSharp
 							break;
 						case "@":
 							logger.Log("Servicing ping request", LoggingLevel.DEBUGGING);
-							requestProcessor = new PingRequestProcessor(tableManager, requestString);
+							requestProcessor = new PingRequestProcessor(tableManager, requestString, new Node(new List<Ring>(), clientIPAddress, clientSocket));
 							break;
 						case "#":
 							logger.Log("Servicing gossip request", LoggingLevel.DEBUGGING);

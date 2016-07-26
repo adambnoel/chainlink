@@ -15,6 +15,7 @@ namespace ChainLinkCLI
 				commandLineArgument = Console.ReadLine();
 				ICommand parsedCommand = parser.ParseCommand(commandLineArgument);
 				parsedCommand.ExecuteCommand();
+				Console.WriteLine("Enter next command.");
 			}
 			Console.WriteLine("Exiting ChainLink CLI");
 		}
