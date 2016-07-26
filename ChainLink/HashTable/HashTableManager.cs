@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -20,9 +21,10 @@ namespace DHTSharp
 		private Semaphore clientRequestHandlerLock = new Semaphore(1, 1);
 		private List<ClientRequestHandler> clientRequestHandlers = new List<ClientRequestHandler>();
 
-		ConcurrentHashTable localHashTable;
+		//Could roll my own - however this will do for as it is just a better version of my own
+		ConcurrentDictionary<String, byte[]> localHashTable;
 
-		public HashTableManager(Node CurrentNode, List<Node> NetworkNodes, ConcurrentHashTable hashTableImplementation)
+		public HashTableManager(Node CurrentNode, List<Node> NetworkNodes, ConcurrentDictionary<String, byte[]> hashTableImplementation)
 		{
 			currentNode = CurrentNode;
 			networkNodes = NetworkNodes;
