@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 
 namespace DHTSharp
@@ -20,19 +19,20 @@ namespace DHTSharp
 
 		private Semaphore clientRequestHandlerLock = new Semaphore(1, 1);
 		private List<ClientRequestHandler> clientRequestHandlers = new List<ClientRequestHandler>();
+		private CoreLogger logger;
 
-		//Could roll my own - however this will do for as it is just a better version of my own
-		ConcurrentDictionary<String, byte[]> localHashTable;
-
-		public HashTableManager(Node CurrentNode, List<Node> NetworkNodes, ConcurrentDictionary<String, byte[]> hashTableImplementation)
+		HashTableWrapper hashTableWrapper = new HashTableWrapper();
+		public HashTableManager(Node CurrentNode, List<Node> NetworkNodes, HashTableWrapper hashTableImplementation, CoreLogger Logger)
 		{
 			currentNode = CurrentNode;
 			networkNodes = NetworkNodes;
-			localHashTable = hashTableImplementation;
+			hashTableWrapper = hashTableImplementation;
+			logger = Logger;
 		}
 
 		public Boolean Run()
 		{
+			logger.Log("Scheduling all Hash Table manager tasks", LoggingLevel.VERBOSE);
 			pingTimer = new Timer(pingTask, this, 1000 * 30, 1000 * 60);
 			gossipTimer = new Timer(gossipTask, this, 1000 * 60, 1000 * 30);
 			connectionCheckTimer = new Timer(connectionCheckTask, this, 1000 * 30, 1000 * 30);
@@ -60,33 +60,84 @@ namespace DHTSharp
 
 		public String DeleteKey(String key)
 		{
-			//Hash key
-			//Check if current node has key
-			//If node has key -> delete from local hashtable
-			//Propagate 
-			return "";
+			byte[] valueBytes = new byte[0];
+			if (currentNode.CheckNodeRingsForKey(key.GetHashCode()))
+			{
+				valueBytes = hashTableWrapper.Delete(key);
+				if (valueBytes.Length == 0)
+				{
+					return "Failed to delete key - either key already deleted or resource locked.";
+				}
+				else {
+					return "Deleted key: " + key;
+				}
+			}
+			else {
+				for (int i = 0; i < networkNodes.Count; i++)
+				{
+					if (networkNodes[i].CheckNodeRingsForKey(key.GetHashCode()))
+					{
+						DeleteRequest deleteRequest = new DeleteRequest(key, networkNodes[i]);
+						return deleteRequest.Process();
+					}
+				}
+				return "Failed to delete key - node unaware of key's hashspace";
+			}
 		}
 
 		public String GetValue(String key)
 		{
-			//Hash key
-			//Check if the current node has key
-			//If node has key -> request from local hashtable
-			//Local hashtable checks if value is in memory or on disk
-			//If in memory -> Retrieve
-			//If not -> Load from disk
-			//If node doesn't have key -> finding node closest to key
-			//Send get request to relevant node -> Parse response
-			//Done!
-			//Reader writer problem??
-
-			return "";
+			byte[] valueBytes = new byte[0];
+			if (currentNode.CheckNodeRingsForKey(key.GetHashCode()))
+			{
+				valueBytes = hashTableWrapper.Get(key);
+				if (valueBytes.Length == 0)
+				{
+					return "";
+				}
+				else {
+					return Encoding.ASCII.GetString(valueBytes);
+				}
+			}
+			else {
+				
+				for (int i = 0; i < networkNodes.Count; i++)
+				{
+					if (networkNodes[i].CheckNodeRingsForKey(key.GetHashCode()))
+					{
+						GetRequest getRequest = new GetRequest(key, networkNodes[i]);
+						return getRequest.Process();
+					}
+				}
+				return "";
+			}
 		}
 
 		public String PutKey(String key, String contents)
 		{
-
-			return "";
+			
+			if (currentNode.CheckNodeRingsForKey(key.GetHashCode()))
+			{
+				if (hashTableWrapper.Put(key, Encoding.ASCII.GetBytes(contents)))
+				{
+					return "OK\r\n";
+				}
+				else
+				{
+					return "ERROR - Failed to put key\r\n";
+				}
+			}
+			else 
+			{
+				for (int i = 0; i < networkNodes.Count; i++)
+				{
+					if (networkNodes[i].CheckNodeRingsForKey(key.GetHashCode()))
+					{
+						PutRequest p = new PutRequest(key, contents, networkNodes[i]);
+					}
+				}
+				return "ERROR - Failed t find key\r\n";
+			}
 		}
 
 		public Boolean AddNetworkNode(Node node)
@@ -103,7 +154,7 @@ namespace DHTSharp
 
 		private void pingTask(Object state)
 		{
-			
+			logger.Log("Running ping task", LoggingLevel.DEBUGGING);
 			foreach (Node node in networkNodes)
 			{
 				PingRequest newPingRequest = new PingRequest(node);
@@ -118,10 +169,12 @@ namespace DHTSharp
 					node.ResetFailedPingCount();
 				}
 			}
+			logger.Log("Finished ping task", LoggingLevel.DEBUGGING);
 		}
 
 		private void gossipTask(Object state)
 		{
+			logger.Log("Running gossip task", LoggingLevel.DEBUGGING);
 			foreach (Node node in networkNodes)
 			{
 				/**	
@@ -132,11 +185,15 @@ namespace DHTSharp
 				}
 				**/
 			}
+			logger.Log("Finished gossip task", LoggingLevel.DEBUGGING);
 		}
 
 		private void hashTableMaintenanceTask(Object state)
 		{
-			
+			logger.Log("Running maintenance task", LoggingLevel.DEBUGGING);
+
+
+			logger.Log("Finished maintenance task", LoggingLevel.DEBUGGING);
 		}
 
 		private void connectionCheckTask(Object state)

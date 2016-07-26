@@ -14,10 +14,12 @@ namespace DHTSharp
 		private DateTime lastRequestTime = DateTime.UtcNow;
 		private Boolean isActive = true;
 		private HashTableManager tableManager;
+		private CoreLogger logger;
 		private Thread clientThread;
 
-		public void Start(TcpClient Client, HashTableManager TableManager)
+		public void Start(TcpClient Client, HashTableManager TableManager, CoreLogger logger)
 		{
+			logger.Log("Servicing new request", LoggingLevel.DEBUGGING);
 			connectedClient = Client;
 			tableManager = TableManager;
 			clientThread = new Thread(HandleRequest);
@@ -26,6 +28,7 @@ namespace DHTSharp
 
 		public void Stop()
 		{
+			logger.Log("Tearing down client connection", LoggingLevel.DEBUGGING);
 			clientThread.Abort();
 		}
 
@@ -55,17 +58,20 @@ namespace DHTSharp
 				clientRequest = Encoding.ASCII.GetString(bytesFrom);
 				if (clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal) == -1) //Invalid request or connection closed
 				{
+					logger.Log("Invalid request made", LoggingLevel.DEBUGGING);
 					string serverResponse = "ERROR\r\n Invalid request format";
 					bytesTo = Encoding.ASCII.GetBytes(serverResponse);
 					networkStream.Write(bytesTo, 0, bytesTo.Length);
 					networkStream.Flush();
 				}
 				else {
+					logger.Log("Servicing client request", LoggingLevel.VERBOSE);
 					clientRequest = clientRequest.Substring(0, clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal));
 					string serverResponse = parseRequestAndRespond(clientRequest);
 					bytesTo = Encoding.ASCII.GetBytes(serverResponse);
 					networkStream.Write(bytesTo, 0, bytesTo.Length);
 					networkStream.Flush();
+					logger.Log("Finished servicing client request", LoggingLevel.VERBOSE);
 				}
 			}
 		}
@@ -86,24 +92,31 @@ namespace DHTSharp
 					switch (splitRequest[0])
 					{
 						case "+":
+							logger.Log("Servicing put request", LoggingLevel.DEBUGGING);
 							requestProcessor = new PutRequestProcessor(tableManager, requestString);
 							break;
 						case "-":
+							logger.Log("Servicing delete request", LoggingLevel.DEBUGGING);
 							requestProcessor = new DeleteRequestProcessor(tableManager, requestString);
 							break;
 						case "*":
+							logger.Log("Servicing get request", LoggingLevel.DEBUGGING);
 							requestProcessor = new GetRequestProcessor(tableManager, requestString);
 							break;
 						case "^":
+							logger.Log("Servicing join request", LoggingLevel.DEBUGGING);
 							requestProcessor = new JoinRequestProcessor(tableManager, requestString);
 							break;
 						case "$":
+							logger.Log("Servicing delete request", LoggingLevel.DEBUGGING);
 							requestProcessor = new LeaveRequestProcessor(tableManager, requestString);
 							break;
 						case "@":
+							logger.Log("Servicing ping request", LoggingLevel.DEBUGGING);
 							requestProcessor = new PingRequestProcessor(tableManager, requestString);
 							break;
 						case "#":
+							logger.Log("Servicing gossip request", LoggingLevel.DEBUGGING);
 							requestProcessor = new GossipRequestProcessor(tableManager, requestString);
 							break;
 						default:
@@ -121,41 +134,6 @@ namespace DHTSharp
 
 			return (requestProcessor != null ? requestProcessor.ProcessAndRespond() : "");
 		}
-
-		/**
-		private String parseRequestAndRespond(String requestString)
-		{
-			IRequest request = null;
-			String[] splitRequest = requestString.Split(new String[] { "\r\n" }, StringSplitOptions.None);
-			if (splitRequest.Length <= 0)
-			{
-				request = new ErrorRequest(requestString);
-				return request.ProcessRequest();
-			}
-			switch (splitRequest[0])
-			{
-				case "+":
-					//request = new PutRequest(requestString);
-					break;
-				case "-":
-					break;
-				case "*":
-					break;
-				case "$":
-					
-					break;
-				case "!":
-					break;
-				case "@":
-					break;
-				case "#":
-					break;
-				default:
-					request = new ErrorRequest(requestString);
-					break;
-			}
-			return request.ProcessRequest();
-		}**/
 	}
 }
 

@@ -5,18 +5,17 @@ namespace DHTSharp
 	public class GetRequest : IRequest
 	{
 		private String requestKey;
-		public GetRequest(String key)
+		private Node destinationNode;
+		public GetRequest(String key, Node DestinationNode)
 		{
 			requestKey = key;
+			destinationNode = DestinationNode;
 		}
 
 		public String Process()
 		{
-			//CLIConfigManager configManager = new CLIConfigManager();
-			//TcpRequest request = new TcpRequest(configManager.GetIPAddress(), configManager.GetPortNumber(), configManager.GetMaxRequestSize());
-			//String response = request.Send(initializeGetRequest());
-
-			return "";
+			TcpRequest request = new TcpRequest(destinationNode.GetIPAddress(), destinationNode.GetNodeSocket());
+			return request.Send(initializeGetRequest());
 		}
 
 		private String initializeGetRequest()

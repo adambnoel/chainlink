@@ -4,15 +4,26 @@ namespace DHTSharp
 	public class DeleteRequest : IRequest
 	{
 		private String key;
-		public DeleteRequest(String requestKey)
+		private Node destinationNode;
+		public DeleteRequest(String requestKey, Node DestinationNode)
 		{
 			key = requestKey;
+			destinationNode = DestinationNode;
 		}
 
 		public String Process()
 		{
-			return String.Empty;
+			TcpRequest request = new TcpRequest(destinationNode.GetIPAddress(), destinationNode.GetNodeSocket());
+			return request.Send(initializeDeleteRequest());
 		}
+
+		private String initializeDeleteRequest()
+		{
+			String deleteRequest = "-\r\n";
+			deleteRequest = deleteRequest + key + "\r\n";
+			return deleteRequest;
+		}
+
 	}
 }
 

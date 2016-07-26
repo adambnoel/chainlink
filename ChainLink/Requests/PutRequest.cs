@@ -6,7 +6,7 @@ namespace DHTSharp
 		private string key;
 		private string body;
 
-		public PutRequest(string requestKey, string requestBody)
+		public PutRequest(string requestKey, string requestBody, Node destinationNode)
 		{
 			key = requestKey;
 			body = requestBody;

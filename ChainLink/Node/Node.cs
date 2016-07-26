@@ -41,7 +41,7 @@ namespace DHTSharp
 			return nodeSocket;
 		}
 
-		public Boolean checkNodeRingsForKey(int hashKey)
+		public Boolean CheckNodeRingsForKey(int hashKey)
 		{
 			foreach (Ring r in nodeDHTRings)
 			{
@@ -53,6 +53,20 @@ namespace DHTSharp
 			return false;
 		}
 
+		public List<Ring> SplitNodeRings()
+		{
+			List<Ring> newRings = new List<Ring>();
+			List<String> ringRangePairs = new List<String>();
+
+			for (int i = 0; i < nodeDHTRings.Count; i++)
+			{
+
+				//ringRangePairs.Add(
+			}
+
+			return newRings;
+		}
+
 		public Boolean FailedNodePulse()
 		{
 			failedPingCount++;
@@ -61,6 +75,18 @@ namespace DHTSharp
 				return true;
 			}
 			return false;
+		}
+
+		private Tuple<int, int> splitHashcodeSpace(int HashcodeSpaceStart, int HashcodeSpaceEnd, Boolean TakeLowerHalf)
+		{
+			if (TakeLowerHalf)
+			{
+				return new Tuple<int, int>(HashcodeSpaceStart, (HashcodeSpaceStart + HashcodeSpaceEnd) / 2);
+			}
+			else 
+			{
+				return new Tuple<int, int>((HashcodeSpaceStart + HashcodeSpaceEnd) / 2, HashcodeSpaceEnd);
+			}
 		}
 
 		public void ResetFailedPingCount()

@@ -22,12 +22,13 @@ namespace DHTSharp
 		private String generateResponse(String value)
 		{
 			String response = String.Empty;
-			response = "*\r\n";
 			if (value == String.Empty)
 			{
+				response = "!\r\n";
 				response = response + "ERROR - Key not found\r\n";
 			}
 			else {
+				response = "*\r\n";
 				response = response + "OK\r\n";
 				response = response + value + "\r\n";
 			}

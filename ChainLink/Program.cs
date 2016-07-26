@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Configuration.Install;
@@ -44,14 +45,15 @@ namespace DHTSharp
 			logger.SetLoggingLevel(loggingLevel);
 			logger.Log("ChainLink node started at: " + DateTime.UtcNow, LoggingLevel.VERBOSE);
 
-			//Configure current node -> Given that the node was offline
-			//You do not know what your keyrange is
+			//Configure the hash table manager and all classes used by application
 			List<Ring> localNodeRings = new List<Ring>();
-			Node currentNode = new Node(localNodeRings, IPAddress.Parse(ConfigurationManager.AppSettings.Get("IPAddress")), int.Parse(ConfigurationManager.AppSettings.Get("PortNumber")));
+			Node rootNode = new Node(localNodeRings, IPAddress.Parse(ConfigurationManager.AppSettings.Get("IPAddress")), int.Parse(ConfigurationManager.AppSettings.Get("PortNumber")));
+			List<Node> connectedNodes = new List<Node>();
+			HashTableWrapper wrapper = new HashTableWrapper();
+			HashTableManager manager = new HashTableManager(rootNode, connectedNodes, wrapper, logger);
 
-
-			//Check for configuration xml -> If found try and connect to old network
-			//If not -> Start as a new DHT network
+			//Configure current node -> Given that the node was offline
+			//Keyrange is unknown -> Will need to join once again
 			try
 			{
 				String xmlFile;
@@ -69,7 +71,8 @@ namespace DHTSharp
 				int numRings = int.Parse(ConfigurationManager.AppSettings.Get("NumberOfRings"));
 				for (int i = 0; i < numRings; i++)
 				{
-					
+					Ring newRing = new Ring(int.MinValue, int.MaxValue);
+					localNodeRings.Add(newRing);
 				}
 
 			}
@@ -80,38 +83,35 @@ namespace DHTSharp
 
 
 			//Application configured -> Start up main loop
-			TcpListener serverSocket = new TcpListener(currentNode.GetIPAddress(), currentNode.GetNodeSocket());
+			TcpListener serverSocket = new TcpListener(rootNode.GetIPAddress(), rootNode.GetNodeSocket());
 			TcpClient clientSocket = default(TcpClient);
-			serverSocket.Start();
+			try
+			{
+				serverSocket.Start();
+			}
+			catch (Exception e)
+			{
+				logger.Log("Failed to start socket server. Caught exception: " + e.ToString() + ", error likely due to incorrect IP/socket", LoggingLevel.CRITICAL);
+				return;
+			}
+
+			if (!manager.Run())
+			{
+				logger.Log("Failed to start hash table manager. Critical error. Application exiting.", LoggingLevel.CRITICAL);
+				return;
+			}
 
 			while (true)
 			{
 				clientSocket = serverSocket.AcceptTcpClient();
 				ClientRequestHandler requestHandler = new ClientRequestHandler();
-				//requestHandler.Start(clientSocket);
-
-
-				/**
-				NetworkStream networkStream = clientSocket.GetStream();
-				byte[] bytesFrom = new byte[2000000];
-				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
-
-				String clientData = System.Text.Encoding.ASCII.GetString(bytesFrom);
-				clientData = clientData.Substring(0, clientData.LastIndexOf("\r\n", StringComparison.Ordinal));
-				Console.WriteLine("Received request from client");
-				**/
-
-				//Console.WriteLine(" >> Data from client - " + dataFromClient);
-				//string serverResponse = "Last Message from client" + dataFromClient;
-				//Byte[] sendBytes = Encoding.ASCII.GetBytes(serverResponse);
-				//networkStream.Write(sendBytes, 0, sendBytes.Length);
-				//networkStream.Flush();
-				//Console.WriteLine(" >> " + serverResponse);
 			}
 
 			serverSocket.Stop();
 			clientSocket.Close();
 		}
+
+
 	}
 }
 

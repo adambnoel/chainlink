@@ -63,7 +63,8 @@
     <Compile Include="RequestProcessors\LeaveRequestProcessor.cs" />
     <Compile Include="RequestProcessors\PingRequestProcessor.cs" />
     <Compile Include="RequestProcessors\GossipRequestProcessor.cs" />
-    <Compile Include="HashTable\ConcurrentHashTable.cs" />
+    <Compile Include="HashTable\HashTableWrapper.cs" />
+    <Compile Include="Requests\TcpRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
