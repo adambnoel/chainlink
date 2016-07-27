@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -17,6 +18,8 @@ namespace DHTSharp
 		private IPAddress nodeAddress;
 		private int nodeSocket;
 		private DateTime lastPingTimeUtc;
+		private int pingRefreshTimeSeconds = 300;
+		private Semaphore lockRings = new Semaphore(1, 1);
 
 		public Node (List<Ring> DHTRings, IPAddress NodeAddress, int Socket) 
 		{
@@ -38,6 +41,11 @@ namespace DHTSharp
 		public int GetNodeSocket()
 		{
 			return nodeSocket;
+		}
+
+		public Boolean RecentlyPinged()
+		{
+			return (lastPingTimeUtc.AddSeconds(pingRefreshTimeSeconds) < DateTime.UtcNow);
 		}
 
 		public DateTime GetLastPingTimeUtc()
@@ -65,14 +73,37 @@ namespace DHTSharp
 		public List<Ring> SplitNodeRings()
 		{
 			List<Ring> newRings = new List<Ring>();
-			List<String> ringRangePairs = new List<String>();
-
-			for (int i = 0; i < nodeDHTRings.Count; i++)
+			lockRings.WaitOne();
+			try
 			{
+				List<Tuple<int, int>> ringTuples = new List<Tuple<int, int>>();
+				foreach (Ring ring in nodeDHTRings)
+				{
+					Tuple<int, int> ringTuple = new Tuple<int, int>(ring.GetHashRangeStart(), ring.GetHashRangeEnd());
+					if (ringTuples.Contains(ringTuple))
+					{
+						Ring newRing = ring.Split(false);
+						newRings.Add(newRing);
 
-				//ringRangePairs.Add(
+						//Removing the ring tuple requires explanation
+						//The idea is that if the ring tuple is present we
+						//want to split the ring from the bottom
+						//otherwise we want to split the ring from the top
+						//We want this to alternate when k >= 2
+						//So we remove it
+						ringTuples.Remove(ringTuple);
+					}
+					else
+					{
+						Ring newRing = ring.Split(true);
+						ringTuples.Add(ringTuple);
+					}
+				}
 			}
-
+			finally
+			{
+				lockRings.Release();
+			}
 			return newRings;
 		}
 
@@ -86,68 +117,6 @@ namespace DHTSharp
 			{
 				return new Tuple<int, int>((HashcodeSpaceStart + HashcodeSpaceEnd) / 2, HashcodeSpaceEnd);
 			}
-		}
-
-
-		public static String Serialize(Node inputNode)
-		{
-			XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
-			DataSet nodeData = new DataSet();
-			Stream dataStream = new MemoryStream();
-			nodeData.Tables.Add(convertNodeToDataTable(inputNode));
-
-			serializer.Serialize(dataStream, nodeData);
-			String serializedNode = dataStream.ToString();
-			dataStream.Close();
-			return serializedNode;
-		}
-
-		public static Node Deserialize(String nodeString)
-		{
-			XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
-			DataSet nodeData = new DataSet();
-			Stream dataStream = new MemoryStream();
-			byte[] nodeStringBytes = Encoding.ASCII.GetBytes(nodeString);
-			dataStream.Read(nodeStringBytes, 0, nodeStringBytes.Length);
-
-			nodeData = (DataSet)serializer.Deserialize(dataStream);
-			List<Ring> nodeRings = new List<Ring>();
-
-			return new Node(nodeRings, IPAddress.Parse(nodeData.Tables["NodeData"].Columns[""].ToString()), int.Parse(nodeData.Tables["NodeData"].Columns[""].ToString()));
-		}
-
-		private static DataTable convertNodeToDataTable(Node inputNode)
-		{
-			DataTable dt = new DataTable();
-			dt.Columns.Add("RingData");
-			dt.Columns.Add("NodeAddress");
-			dt.Columns.Add("NodeSocket");
-			DataRow row = dt.NewRow();
-			String serializedRings = String.Empty;
-			foreach (Ring r in inputNode.nodeDHTRings)
-			{
-				serializedRings = serializedRings + Ring.Serialize(r) + ";";
-			}
-			row["RingData"] = serializedRings;
-			row["NodeAddress"] = inputNode.nodeAddress.ToString();
-			row["NodeSocket"] = inputNode.nodeSocket.ToString();
-			dt.Rows.Add(row);
-			return dt;
-		}
-
-		private static Node convertDataTableToNode(DataTable dt)
-		{
-			List<Ring> nodeRings = new List<Ring>();
-			String serializedRings = dt.Rows[0]["RingData"].ToString();
-			String[] splitSerializedRings = serializedRings.Split(';');
-			for (int i = 0; i < splitSerializedRings.Length; i++)
-			{
-				Ring newRing = Ring.Deserialize(splitSerializedRings[i]);
-				nodeRings.Add(newRing);
-			}
-			String IPAddressString = dt.Rows[0]["NodeAddress"].ToString();
-			String SocketString = dt.Rows[0]["NodeSocket"].ToString();
-			return new Node(nodeRings, IPAddress.Parse(IPAddressString), int.Parse(SocketString));
 		}
 	}
 }

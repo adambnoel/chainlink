@@ -17,16 +17,29 @@ namespace DHTSharp
 		public String Send(String requestContents)
 		{
 			TcpClient clientSocket = new TcpClient();
-			clientSocket.Connect(address, port);
-			NetworkStream serverStream = clientSocket.GetStream();
-			byte[] requestBytes = Encoding.ASCII.GetBytes(requestContents);
-			serverStream.Write(requestBytes, 0, requestBytes.Length);
-			serverStream.Flush();
+			try
+			{
+				clientSocket.Connect(address, port);
+				NetworkStream serverStream = clientSocket.GetStream();
+				byte[] requestBytes = Encoding.ASCII.GetBytes(requestContents);
+				serverStream.Write(requestBytes, 0, requestBytes.Length);
+				serverStream.Flush();
 
-			byte[] inputStream = new byte[4000000];
-			serverStream.Read(inputStream, 0, 4000000);
-			clientSocket.Close();
-			return Encoding.ASCII.GetString(inputStream);
+				byte[] inputStream = new byte[4000000];
+				serverStream.Read(inputStream, 0, 4000000);
+				clientSocket.Close();
+				return Encoding.ASCII.GetString(inputStream);
+			}
+			catch (Exception e)
+			{
+				return String.Empty;
+			}
+			finally
+			{
+				if (clientSocket.Connected)
+					clientSocket.Close();
+			}
+
 		}
 	}
 }

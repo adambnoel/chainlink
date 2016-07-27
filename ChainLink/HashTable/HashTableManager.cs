@@ -59,21 +59,20 @@ namespace DHTSharp
 								 where x.GetIPAddress().Equals(sourceNode.GetIPAddress())
 								 && x.GetHashCode().Equals(sourceNode.GetHashCode())
 								 select x).FirstOrDefault();
-			if (relevantNode != null)
-			{
-				recentNodePings.Enqueue(sourceNode);
-			}
-			else 
-			{
-				newNodes.Enqueue(sourceNode);
-			}
+			recentNodePings.Enqueue(sourceNode);
 		}
 
 		public String RequestJoinNetwork(Node node)
 		{
-			//A node
-
-			return "";
+			String joinRequestResponse = "$\r\n";
+			List<Ring> newRings = currentNode.SplitNodeRings();
+			foreach (Ring newRing in newRings)
+			{
+				node.AddRing(newRing);
+				joinRequestResponse = joinRequestResponse + newRing.GetHashRangeStart() + "-" + newRing.GetHashRangeEnd() + "\r\n";
+			}
+			newNodes.Enqueue(node); //Don't want to block the DHT while adding new node
+			return joinRequestResponse;
 		}
 
 		public String RequestLeaveNetwork(Node node)
@@ -138,7 +137,6 @@ namespace DHTSharp
 
 		public String PutKey(String key, String contents)
 		{
-			
 			if (currentNode.CheckNodeRingsForKey(key.GetHashCode()))
 			{
 				if (hashTableWrapper.Put(key, Encoding.ASCII.GetBytes(contents)))
@@ -178,33 +176,65 @@ namespace DHTSharp
 
 		private void newNodeTask(Object state)
 		{
-			while (newNodes.Count != 0)
+			networkNodeLock.WaitOne();
+			try
 			{
-				try
+				while (newNodes.Count != 0)
 				{
+					try
+					{
+						Node newNode = newNodes.Dequeue();
+						var nodeCheck = (from x in networkNodes
+										 where x.GetIPAddress().Equals(newNode.GetIPAddress())
+										 && x.GetHashCode().Equals(newNode.GetHashCode())
+										 select x).FirstOrDefault();
+						if (nodeCheck == null) //Node isn't added -> let us add it
+						{
+							networkNodes.Add(newNode);
+						}
+					}
+					finally
+					{
 
-				}
-				catch (Exception e)
-				{
+					}
 
 				}
 			}
+			finally
+			{
+				networkNodeLock.Release();
+			}
+
 		}
 
 		private void updateNodeTask(Object state)
 		{
+			
 			while (recentNodePings.Count != 0)
 			{
+				networkNodeLock.WaitOne();
 				try
 				{
 					Node pingSourceNode = recentNodePings.Dequeue();
-
+					var relevantNode = (from x in networkNodes
+										where x.GetIPAddress().Equals(pingSourceNode.GetIPAddress())
+										&& x.GetHashCode().Equals(pingSourceNode.GetHashCode())
+										select x).FirstOrDefault();
+					if (relevantNode != null) //Node was removed -> move on
+					{
+						relevantNode.SetLastPingTimeUtc(pingSourceNode.GetLastPingTimeUtc());
+					}
 				}
-				catch (Exception e)
+				finally
 				{
-
+					networkNodeLock.Release(); //Only hold for servicing one ping request
 				}
 			}
+		}
+
+		private void removeNodeTask(Object state)
+		{
+
 		}
 
 		private void pingTask(Object state)
@@ -212,7 +242,12 @@ namespace DHTSharp
 			logger.Log("Running ping task", LoggingLevel.DEBUGGING);
 			foreach (Node node in networkNodes)
 			{
-				PingRequest newPingRequest = new PingRequest(node);
+				if (!node.RecentlyPinged())
+				{
+					PingRequest newPingRequest = new PingRequest(node);
+					String response = newPingRequest.Process();
+
+				}
 			}
 			logger.Log("Finished ping task", LoggingLevel.DEBUGGING);
 		}
@@ -236,7 +271,6 @@ namespace DHTSharp
 		private void hashTableMaintenanceTask(Object state)
 		{
 			logger.Log("Running maintenance task", LoggingLevel.DEBUGGING);
-
 
 			logger.Log("Finished maintenance task", LoggingLevel.DEBUGGING);
 		}

@@ -51,7 +51,8 @@ namespace DHTSharp
 				{
 					String queuedText = LogQueue.Dequeue();
 					f.WriteLine(queuedText);
-				} finally { }
+				}
+				catch (Exception e) {}
 			}
 			f.Flush();
 		}

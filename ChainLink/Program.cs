@@ -14,9 +14,6 @@ namespace DHTSharp
 	{
 		public static void Main (string[] args)
 		{
-
-			//HashTableManager manager = new HashTableManager();
-
 			//Initialize the logger
 			String logFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("FilePath"), ConfigurationManager.AppSettings.Get("FileName"));
 			CoreLogger logger = new CoreLogger(logFilePath);
@@ -54,31 +51,39 @@ namespace DHTSharp
 			//Keyrange is unknown -> Will need to join once again
 			try
 			{
-				XDocument networkFile = XDocument.Load(ConfigurationManager.AppSettings.Get("NetworkXmlFile"));
+				XDocument networkFile = XDocument.Load(ConfigurationManager.AppSettings.Get("SeedNodeFile"));
 				var networkNodes = networkFile.Root
-											  .Elements("SeedNodes")
+											  .Elements("Node")
 											  .Select(x => new Node(new List<Ring>(),
 															IPAddress.Parse((string)x.Attribute("ip")),
 															int.Parse((string)x.Attribute("port"))))
-				                              .ToList();
+											  .ToList();
+				if (networkNodes.Count == 0)
+				{
+					throw new Exception("Failed to seed network file. Defaulting to acting as root node");
+				}
 				logger.Log("Parsed network file. Trying to join network", LoggingLevel.VERBOSE);
-
 				Random random = new Random();
-				List<int> attemptedNodes = new List<int>();
+				List<Ring> assignedRings = new List<Ring>();
 				do
 				{
 					int chosenNodeID = random.Next(0, networkNodes.Count);
 					Node chosenNode = networkNodes[chosenNodeID];
-					PingRequest pingRequest = new PingRequest(chosenNode);
-					String result = pingRequest.Process();
-					if (result == "OK")
+					JoinRequest joinRequest = new JoinRequest(rootNode, chosenNode);
+					String result = joinRequest.Process();
+					if (result != String.Empty)
 					{
+						assignedRings = Ring.ParseJoinRequest(result);
 						break;
 					}
+					networkNodes.Remove(chosenNode); //Didn't work -> don't try and contact again
 
-				} while (attemptedNodes.Count != 0);
-
-				                                      
+				} while (networkNodes.Count != 0);
+				if (assignedRings.Count == 0)
+				{
+					logger.Log("Failed to contact any network nodes. Starting as root node", LoggingLevel.WARNING);
+					throw new Exception("Failed to join network during startup. Will boot as root node.");
+				}
 			}
 			catch (Exception e)
 			{
@@ -92,9 +97,8 @@ namespace DHTSharp
 			}
 			finally
 			{
-
+				manager.Run();
 			}
-
 
 			//Application configured -> Start up main loop
 			TcpListener serverSocket = new TcpListener(rootNode.GetIPAddress(), rootNode.GetNodeSocket());
@@ -120,25 +124,6 @@ namespace DHTSharp
 				clientSocket = serverSocket.AcceptTcpClient();
 				ClientRequestHandler requestHandler = new ClientRequestHandler();
 				requestHandler.Start(clientSocket, manager, logger);
-				//requestHandler.Start(clientSocket);
-
-
-				/**
-				NetworkStream networkStream = clientSocket.GetStream();
-				byte[] bytesFrom = new byte[2000000];
-				networkStream.Read(bytesFrom, 0, bytesFrom.Length);
-
-				String clientData = System.Text.Encoding.ASCII.GetString(bytesFrom);
-				clientData = clientData.Substring(0, clientData.LastIndexOf("\r\n", StringComparison.Ordinal));
-				Console.WriteLine("Received request from client");
-				**/
-
-				//Console.WriteLine(" >> Data from client - " + dataFromClient);
-				//string serverResponse = "Last Message from client" + dataFromClient;
-				//Byte[] sendBytes = Encoding.ASCII.GetBytes(serverResponse);
-				//networkStream.Write(sendBytes, 0, sendBytes.Length);
-				//networkStream.Flush();
-				//Console.WriteLine(" >> " + serverResponse);
 			}
 
 			serverSocket.Stop();

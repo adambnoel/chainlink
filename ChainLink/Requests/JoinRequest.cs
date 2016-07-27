@@ -6,25 +6,24 @@ namespace DHTSharp
 	public class JoinRequest : IRequest
 	{
 		Node sourceNode;
-		Node targetNode;
-		public JoinRequest(Node SourceNode, Node TargetNode)
+		Node destinationNode;
+		public JoinRequest(Node SourceNode, Node DestinationNode)
 		{
 			sourceNode = SourceNode;
-			targetNode = TargetNode;
+			destinationNode = DestinationNode;
 		}
 
 		public String Process()
 		{
-			return "";
+			TcpRequest request = new TcpRequest(destinationNode.GetIPAddress(), destinationNode.GetHashCode());
+			return request.Send(initializeJoinRequest());
 		}
 		private String initializeJoinRequest()
 		{
-			StringBuilder sb = new StringBuilder();
-			sb.Append('$');
-			sb.Append("\r\n");
-			sb.Append(Node.Serialize(sourceNode)); //Send details about the node that wants to join the network
-			sb.Append("\r\n");
-			return sb.ToString();
+			String joinRequest = "$\r\n";
+			joinRequest = joinRequest + sourceNode.GetIPAddress().ToString() + "\r\n";
+			joinRequest = joinRequest + sourceNode.GetNodeSocket().ToString() + "\r\n";
+			return joinRequest;
 		}
 	}
 }
