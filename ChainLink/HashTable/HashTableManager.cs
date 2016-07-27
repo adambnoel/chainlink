@@ -176,6 +176,7 @@ namespace DHTSharp
 
 		private void newNodeTask(Object state)
 		{
+			//Attain a lock on the network node object until all new nodes are added
 			networkNodeLock.WaitOne();
 			try
 			{
@@ -197,7 +198,6 @@ namespace DHTSharp
 					{
 
 					}
-
 				}
 			}
 			finally

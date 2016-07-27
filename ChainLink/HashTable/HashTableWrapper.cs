@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace DHTSharp
 {
@@ -33,7 +34,22 @@ namespace DHTSharp
 			{
 				return removedValueBytes;
 			}
-			return removedValueBytes;
+			else {
+				return null;
+			}
+		}
+
+		public List<String> GetKeysWithinHashrange(int HashRangeStart, int HashRangeEnd)
+		{
+			List<String> validKeys = new List<String>();
+			foreach (String s in hashTable.Keys)
+			{
+				if (s.GetHashCode() >= HashRangeStart && s.GetHashCode() <= HashRangeEnd)
+				{
+					validKeys.Add(s);
+				}
+			}
+			return validKeys;
 		}
 
 	}
