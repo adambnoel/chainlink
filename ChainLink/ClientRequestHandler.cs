@@ -91,7 +91,10 @@ namespace DHTSharp
 				}
 				finally
 				{
-
+					if (!connectedClient.Connected)
+					{
+						isActive = false;
+					}
 				}
 			}
 		}

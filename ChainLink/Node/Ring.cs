@@ -106,6 +106,47 @@ namespace DHTSharp
 			}
 			return assignedRings;
 		}
+
+		public static List<Ring> ParseLeaveRequest(string LeaveRequest, out Node newNode)
+		{
+			List<Ring> parsedRings = new List<Ring>();
+			LeaveRequest = LeaveRequest.Substring(0, LeaveRequest.LastIndexOf("\r\n", StringComparison.Ordinal));
+			String[] splitLeaveRequest = LeaveRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);
+
+			if (splitLeaveRequest.Length < 3) //Cannot be valid
+			{
+				newNode = null;
+				return null;
+			}
+			IPAddress nodeAddress;
+			if (!IPAddress.TryParse(splitLeaveRequest[1], out nodeAddress))
+			{
+				newNode = null;
+				return null;
+			}
+			int nodeSocket;
+			if (!int.TryParse(splitLeaveRequest[2], out nodeSocket)) {
+				newNode = null;
+				return null;
+			}
+			try
+			{
+				for (int i = 3; i < splitLeaveRequest.Length; i++)
+				{
+					String[] splitRingRanges = splitLeaveRequest[i].Split(',');
+					Ring r = new Ring(int.Parse(splitRingRanges[0]), int.Parse(splitRingRanges[1]));
+					parsedRings.Add(r);
+				}
+			}
+			catch (Exception e)
+			{
+				newNode = null;
+				return null;
+			}
+
+			newNode = new Node(parsedRings, nodeAddress, nodeSocket);
+			return parsedRings;
+		}
 	}
 }
 

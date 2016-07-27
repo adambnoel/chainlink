@@ -10,7 +10,6 @@ namespace DHTSharp
 	public class HashTableManager
 	{
 		private Node currentNode;
-		private volatile bool higherPriorityTaskLock = false;
 		private Semaphore networkNodeLock = new Semaphore(1, 1);
 		private List<Node> networkNodes = new List<Node>();
 
@@ -20,9 +19,7 @@ namespace DHTSharp
 		private Timer newNodeTimer;
 
 		private Timer pingTimer;
-		private Timer gossipTimer;
 		private Timer connectionCheckTimer;
-		private Timer maintenanceTimer;
 
 		private Semaphore clientRequestHandlerLock = new Semaphore(1, 1);
 		private List<ClientRequestHandler> clientRequestHandlers = new List<ClientRequestHandler>();
@@ -39,11 +36,9 @@ namespace DHTSharp
 
 		public Boolean Run()
 		{
-			logger.Log("Scheduling all Hash Table manager tasks", LoggingLevel.VERBOSE);
-			pingTimer = new Timer(pingTask, this, 1000 * 30, 1000 * 60);
-			gossipTimer = new Timer(gossipTask, this, 1000 * 60, 1000 * 30);
-			connectionCheckTimer = new Timer(connectionCheckTask, this, 1000 * 30, 1000 * 30);
-			maintenanceTimer = new Timer(hashTableMaintenanceTask, this, 1000 * 300, 1000 * 300);
+			pingTimer = new Timer(pingTask, this, 1000 * 60, 1000 * 60);
+			connectionCheckTimer = new Timer(connectionCheckTask, this, 1000 * 60, 1000 * 60);
+			newNodeTimer = new Timer(newNodeTransferTask, this, 1000 * 60, 1000 * 60);
 			return true;
 		}
 
@@ -62,9 +57,14 @@ namespace DHTSharp
 			recentNodePings.Enqueue(sourceNode);
 		}
 
-		public String RequestJoinNetwork(Node node)
+		//This method would be used by the service to leave the network
+		public void LeaveNetwork()
 		{
 			
+		}
+
+		public String RequestJoinNetwork(Node node)
+		{
 			String joinRequestResponse = "^\r\n";
 			List<Ring> newRings = currentNode.SplitNodeRings();
 			if (newRings.Count == 0)
@@ -84,12 +84,17 @@ namespace DHTSharp
 			return joinRequestResponse;
 		}
 
-		public String RequestLeaveNetwork(Node node)
+		public String RequestLeaveNetwork(Node node, List<Ring> nodeRings)
 		{
-			String leaveNetworkResponse = "$\r\n";
-
-
-			return leaveNetworkResponse;
+			if (currentNode.MergeRings(nodeRings))
+			{
+				String leaveNetworkResponse = "$\r\nOK\r\n"; //This signals to the leaving table to transmit over all keys
+				networkNodes.Remove(node);
+				return leaveNetworkResponse;
+			}
+			else {
+				return "!\r\nFailed to process leave request. Cannot merge rings";
+			}
 		}
 
 		public String DeleteKey(String key)
@@ -204,64 +209,40 @@ namespace DHTSharp
 		//Transfer keys to new node
 		private void newNodeTransferTask(Object state)
 		{
-			higherPriorityTaskLock = true;
-			networkNodeLock.WaitOne();
-			try
+			while (newNodes.Count != 0)
 			{
-				while (newNodes.Count != 0)
+				try
 				{
-					try
+					Node addedNode = newNodes.Dequeue();
+					Node relevantNode = (from x in networkNodes
+										 where x.GetIPAddress() == addedNode.GetIPAddress()
+										 && x.GetNodeSocket() == addedNode.GetNodeSocket()
+										 select x).FirstOrDefault();
+					if (relevantNode != null)
 					{
-						Node newNode = newNodes.Dequeue();
-						List<String> keysToMigrate = new List<String>();
-
-						//List<String> keysToMigrate = hashTableWrapper.GetKeysWithinHashrange(newNode.
-					}
-					finally
-					{
-
-					}
-				}
-			}
-			finally
-			{
-				higherPriorityTaskLock = false;
-				networkNodeLock.Release();
-			}
-		}
-
-		//This task deals with nodes that joined the network from sending a join request to this node
-		private void newNodeTask(Object state)
-		{
-			//Attain a lock on the network node object until all new nodes are added
-			networkNodeLock.WaitOne();
-			try
-			{
-				while (newNodes.Count != 0)
-				{
-					try
-					{
-						Node newNode = newNodes.Dequeue();
-						Boolean NodeIsNew = ((from x in networkNodes
-													  where x.GetIPAddress().Equals(newNode.GetIPAddress())
-													  && x.GetHashCode().Equals(newNode.GetHashCode())
-													  select x).FirstOrDefault() == null);
-						if (NodeIsNew)
+						Monitor.Enter(relevantNode);
+						try
 						{
-
+							List<String> keysToMigrate = relevantNode.GetKeysWithinHashTable(hashTableWrapper);
+							foreach (String keyToMigrate in keysToMigrate)
+							{
+								byte[] transferPayload = hashTableWrapper.Delete(keyToMigrate);
+								PutRequest putRequest = new PutRequest(keyToMigrate, Encoding.ASCII.GetString(transferPayload), relevantNode);
+								Thread transferThread = new Thread(() => keyTransferTask(putRequest));
+								transferThread.Start();
+							}
+						}
+						finally
+						{
+							Monitor.Exit(relevantNode);
 						}
 					}
-					finally
-					{
+				}
+				catch (Exception e) //Just in case multiple of these threads spawn
+				{
 
-					}
 				}
 			}
-			finally
-			{
-				networkNodeLock.Release();
-			}
-
 		}
 
 		private void updateNodeTask(Object state)
@@ -296,41 +277,30 @@ namespace DHTSharp
 
 		private void pingTask(Object state)
 		{
-			logger.Log("Running ping task", LoggingLevel.DEBUGGING);
 			foreach (Node node in networkNodes)
 			{
 				if (!node.RecentlyPinged())
 				{
+					logger.Log("Pinging network node: " + node.GetIPAddress().ToString() + "," + node.GetNodeSocket(), LoggingLevel.DEBUGGING);
 					PingRequest newPingRequest = new PingRequest(node);
 					String response = newPingRequest.Process();
+					if (response != String.Empty)
+					{
+						String[] splitPingResponse = response.Split(new String[] { "\r\n" }, StringSplitOptions.None);
+						if (splitPingResponse[0] == "@" && splitPingResponse.Length < 2)
+						{
+							DateTime lastResponseTime = DateTime.UtcNow;
+							if (DateTime.TryParse(splitPingResponse[1], out lastResponseTime)) {
+								node.SetLastPingTimeUtc(lastResponseTime);
+							}
+							logger.Log("Got response from network node: " + node.GetIPAddress().ToString() + "," + node.GetNodeSocket(), LoggingLevel.DEBUGGING);
+						}
+					}
 				}
 			}
-			logger.Log("Finished ping task", LoggingLevel.DEBUGGING);
 		}
-
-		private void gossipTask(Object state)
-		{
-			logger.Log("Running gossip task", LoggingLevel.DEBUGGING);
-			foreach (Node node in networkNodes)
-			{
-				/**	
-				GossipRequest newGossipRequest = new GossipRequest(node);
-				if (newGossipRequest.ProcessRequest() != "OK\r\n")
-				{
-
-				}
-				**/
-			}
-			logger.Log("Finished gossip task", LoggingLevel.DEBUGGING);
-		}
-
-		private void hashTableMaintenanceTask(Object state)
-		{
-			logger.Log("Running maintenance task", LoggingLevel.DEBUGGING);
-
-			logger.Log("Finished maintenance task", LoggingLevel.DEBUGGING);
-		}
-
+	
+							    //
 		private void connectionCheckTask(Object state)
 		{
 			clientRequestHandlerLock.WaitOne();
@@ -353,6 +323,18 @@ namespace DHTSharp
 			finally
 			{
 				clientRequestHandlerLock.Release();
+			}
+		}
+
+		private void keyTransferTask(PutRequest request)
+		{
+			try
+			{
+				request.Process();
+			}
+			catch (Exception e)
+			{
+
 			}
 		}
 	}

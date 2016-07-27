@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace DHTSharp
 {
 	public class LeaveRequestProcessor : IRequestProcessor
 	{
 		private HashTableManager tableManager;
 		private Node leavingNode;
+		private List<Ring> nodeRings;
 
 		public LeaveRequestProcessor(HashTableManager TableManager, String LeaveRequest)
 		{
@@ -14,7 +17,7 @@ namespace DHTSharp
 
 		public String ProcessAndRespond()
 		{
-			return generateResponse(tableManager.RequestLeaveNetwork(leavingNode));
+			return generateResponse(tableManager.RequestLeaveNetwork(leavingNode, nodeRings));
 		}
 
 		private String generateResponse(String requestResult)

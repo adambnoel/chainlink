@@ -18,7 +18,7 @@ namespace DHTSharp
 		private IPAddress nodeAddress;
 		private int nodeSocket;
 		private DateTime lastPingTimeUtc;
-		private int pingRefreshTimeSeconds = 300;
+		private int pingRefreshTimeSeconds = 300; //Ping node every five minutes
 		private Semaphore lockRings = new Semaphore(1, 1);
 
 		public Node (List<Ring> DHTRings, IPAddress NodeAddress, int Socket) 
@@ -58,16 +58,42 @@ namespace DHTSharp
 			lastPingTimeUtc = newPingTime;
 		}
 
+		public String GetSerializedRings()
+		{
+			lockRings.WaitOne();
+			try
+			{
+				String serializedRings = String.Empty;
+				foreach (Ring r in nodeDHTRings)
+				{
+					serializedRings = serializedRings + r.GetHashRangeStart().ToString() + "," + r.GetHashRangeEnd().ToString() + "\r\n";
+				}
+				return serializedRings;
+			}
+			finally
+			{
+				lockRings.Release();
+			}
+
+		}
+
 		public Boolean CheckNodeRingsForKey(int hashKey)
 		{
-			foreach (Ring r in nodeDHTRings)
+			lockRings.WaitOne(); try
 			{
-				if (r.CheckRingForKey(hashKey))
+				foreach (Ring r in nodeDHTRings)
 				{
-					return true;
+					if (r.CheckRingForKey(hashKey))
+					{
+						return true;
+					}
 				}
+				return false;
 			}
-			return false;
+			finally
+			{
+				lockRings.Release();
+			}
 		}
 
 		public List<Ring> SplitNodeRings()
@@ -107,6 +133,19 @@ namespace DHTSharp
 			}
 			return newRings;
 		}
+
+		public List<String> GetKeysWithinHashTable(HashTableWrapper wrapper)
+		{
+			List<String> keysWithinRange = new List<String>();
+			foreach (Ring r in nodeDHTRings)
+			{
+				List<String> keysWithinRing = wrapper.GetKeysWithinHashrange(r.GetHashRangeStart(), r.GetHashRangeEnd());
+				keysWithinRange.AddRange(keysWithinRing);
+			}
+			return keysWithinRange;
+		}
+
+
 
 		public Boolean MergeRings(List<Ring> RingsToMerge)
 		{
