@@ -55,7 +55,6 @@ namespace DHTSharp
 
 		public void PingNetworkNode(Node sourceNode)
 		{
-
 			Node relevantNode = (from x in networkNodes
 								 where x.GetIPAddress().Equals(sourceNode.GetIPAddress())
 								 && x.GetHashCode().Equals(sourceNode.GetHashCode())
@@ -65,25 +64,32 @@ namespace DHTSharp
 
 		public String RequestJoinNetwork(Node node)
 		{
-			String joinRequestResponse = "$\r\n";
+			
+			String joinRequestResponse = "^\r\n";
 			List<Ring> newRings = currentNode.SplitNodeRings();
 			if (newRings.Count == 0)
 			{
+				logger.Log("Failed to split rings - may indicate underlying issue", LoggingLevel.WARNING);
 				return "!\r\nFailed to join network. Rings could not be split";
 			}
 			foreach (Ring newRing in newRings)
 			{
-				logger.Log("Responding to join request with new ring details", LoggingLevel.DEBUGGING);
+				logger.Log("Responding to join request with details of one ring", LoggingLevel.DEBUGGING);
 				node.AddRing(newRing);
-				joinRequestResponse = joinRequestResponse + newRing.GetHashRangeStart() + "-" + newRing.GetHashRangeEnd() + "\r\n";
+				joinRequestResponse = joinRequestResponse + newRing.GetHashRangeStart() + "," + newRing.GetHashRangeEnd() + "\r\n";
 			}
-			newNodes.Enqueue(node); //Don't want to block the DHT while adding new node
+			AddNetworkNode(node); //Add new node to network -> 
+			newNodes.Enqueue(node); //Don't want to block the DHT while transferring files. Do that later
+			logger.Log("Sending join response", LoggingLevel.DEBUGGING);
 			return joinRequestResponse;
 		}
 
 		public String RequestLeaveNetwork(Node node)
 		{
-			return "";
+			String leaveNetworkResponse = "$\r\n";
+
+
+			return leaveNetworkResponse;
 		}
 
 		public String DeleteKey(String key)
@@ -168,15 +174,30 @@ namespace DHTSharp
 			}
 		}
 
-		public Boolean AddNetworkNode(Node node)
+		public void AddNetworkNode(Node node)
 		{
-			networkNodes.Add(node);
-			return true;
+			networkNodeLock.WaitOne();
+			try
+			{
+				networkNodes.Add(node);
+			}
+			finally
+			{
+				networkNodeLock.Release();
+			}
 		}
 
 		public Boolean RemoveNetworkNode(Node node)
 		{
-			networkNodes.Add(node);
+			networkNodeLock.WaitOne();
+			try
+			{
+				networkNodes.Remove(node);
+			}
+			finally
+			{
+				networkNodeLock.Release();
+			}
 			return true;
 		}
 
@@ -282,7 +303,6 @@ namespace DHTSharp
 				{
 					PingRequest newPingRequest = new PingRequest(node);
 					String response = newPingRequest.Process();
-
 				}
 			}
 			logger.Log("Finished ping task", LoggingLevel.DEBUGGING);

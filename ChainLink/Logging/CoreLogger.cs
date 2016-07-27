@@ -30,7 +30,7 @@ namespace DHTSharp
 
 		public void Log(String LogText, LoggingLevel TextLoggingLevel)
 		{
-			if (TextLoggingLevel < currentLevel)
+			if (TextLoggingLevel <= currentLevel)
 			{
 				LogQueue.Enqueue(LogText);
 			}

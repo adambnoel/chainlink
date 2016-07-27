@@ -57,31 +57,41 @@ namespace DHTSharp
 
 			while (isActive)
 			{
-				
-				NetworkStream networkStream = connectedClient.GetStream();
-				if (networkStream.CanRead)
+				try
 				{
-					lastRequestTime = DateTime.UtcNow;
-					networkStream.Read(bytesFrom, 0, bytesFrom.Length);
-					clientRequest = Encoding.ASCII.GetString(bytesFrom);
-					if (clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal) == -1) //Invalid request or connection closed
+					NetworkStream networkStream = connectedClient.GetStream();
+					if (networkStream.CanRead)
 					{
-						logger.Log("Invalid request made", LoggingLevel.DEBUGGING);
-						string serverResponse = "ERROR\r\n Invalid request format";
-						bytesTo = Encoding.ASCII.GetBytes(serverResponse);
-						networkStream.Write(bytesTo, 0, bytesTo.Length);
-						networkStream.Flush();
+						lastRequestTime = DateTime.UtcNow;
+						networkStream.Read(bytesFrom, 0, bytesFrom.Length);
+						clientRequest = Encoding.ASCII.GetString(bytesFrom);
+						if (clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal) == -1) //Invalid request or connection closed
+						{
+							logger.Log("Invalid request made", LoggingLevel.DEBUGGING);
+							string serverResponse = "ERROR\r\n Invalid request format";
+							bytesTo = Encoding.ASCII.GetBytes(serverResponse);
+							networkStream.Write(bytesTo, 0, bytesTo.Length);
+							networkStream.Flush();
+						}
+						else {
+							logger.Log("Servicing client request", LoggingLevel.VERBOSE);
+							clientRequest = clientRequest.Substring(0, clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal));
+							string serverResponse = parseRequestAndRespond(clientRequest);
+							bytesTo = Encoding.ASCII.GetBytes(serverResponse);
+							networkStream.Write(bytesTo, 0, bytesTo.Length);
+							networkStream.Flush();
+							networkStream.Close();
+							logger.Log("Finished servicing client request", LoggingLevel.VERBOSE);
+						}
 					}
-					else {
-						logger.Log("Servicing client request", LoggingLevel.VERBOSE);
-						clientRequest = clientRequest.Substring(0, clientRequest.LastIndexOf("\r\n", StringComparison.Ordinal));
-						string serverResponse = parseRequestAndRespond(clientRequest);
-						bytesTo = Encoding.ASCII.GetBytes(serverResponse);
-						networkStream.Write(bytesTo, 0, bytesTo.Length);
-						networkStream.Flush();
-						networkStream.Close();
-						logger.Log("Finished servicing client request", LoggingLevel.VERBOSE);
-					}
+				}
+				catch (Exception e)
+				{
+
+				}
+				finally
+				{
+
 				}
 			}
 		}
@@ -118,7 +128,7 @@ namespace DHTSharp
 							requestProcessor = new JoinRequestProcessor(tableManager, requestString);
 							break;
 						case "$":
-							logger.Log("Servicing delete request", LoggingLevel.DEBUGGING);
+							logger.Log("Servicing leave request", LoggingLevel.DEBUGGING);
 							requestProcessor = new LeaveRequestProcessor(tableManager, requestString);
 							break;
 						case "@":

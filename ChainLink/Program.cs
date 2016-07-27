@@ -74,6 +74,10 @@ namespace DHTSharp
 					if (result != String.Empty)
 					{
 						assignedRings = Ring.ParseJoinRequest(result);
+						foreach (Ring newlyAssignedRing in assignedRings)
+						{
+							localNodeRings.Add(newlyAssignedRing);
+						}
 						break;
 					}
 					networkNodes.Remove(chosenNode); //Didn't work -> don't try and contact again

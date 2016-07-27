@@ -20,7 +20,7 @@ namespace DHTSharp
 		}
 		private String initializeJoinRequest()
 		{
-			String joinRequest = "$\r\n";
+			String joinRequest = "^\r\n";
 			joinRequest = joinRequest + sourceNode.GetIPAddress().ToString() + "\r\n";
 			joinRequest = joinRequest + sourceNode.GetNodeSocket().ToString() + "\r\n";
 			return joinRequest;

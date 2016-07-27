@@ -108,6 +108,41 @@ namespace DHTSharp
 			return newRings;
 		}
 
+		public Boolean MergeRings(List<Ring> RingsToMerge)
+		{
+			List<Boolean> mergeCheckList = new List<Boolean>();
+			lockRings.WaitOne();
+			try
+			{
+				if (RingsToMerge.Count != nodeDHTRings.Count)
+				{
+					return false;
+				}
+				for (int i = 0; i < RingsToMerge.Count; i++)
+				{
+					Boolean check = (nodeDHTRings[i].CheckAdjacent(RingsToMerge[i]));
+					mergeCheckList.Add(check);
+				}
+				if (mergeCheckList.Count == 0)
+				{
+					return false;
+				}
+				Boolean mergeSuccess = true;
+				foreach (Boolean check in mergeCheckList) {
+					mergeSuccess = (mergeSuccess && check);
+				}
+				for (int i = 0; i < RingsToMerge.Count; i++)
+				{
+					nodeDHTRings[i].Merge(RingsToMerge[i]);
+				}
+			}
+			finally
+			{
+				lockRings.Release();
+			}
+			return true;
+		}
+
 		private Tuple<int, int> splitHashcodeSpace(int HashcodeSpaceStart, int HashcodeSpaceEnd, Boolean TakeLowerHalf)
 		{
 			if (TakeLowerHalf)

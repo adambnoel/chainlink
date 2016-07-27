@@ -41,6 +41,26 @@ namespace DHTSharp
 			return false;
 		}
 
+		public Boolean CheckAdjacent(Ring inputRing)
+		{
+			int inputHashRangeStart = inputRing.GetHashRangeStart();
+			int inputHashRangeEnd = inputRing.GetHashRangeEnd();
+			//Rings may be above or below each other
+			if (inputHashRangeStart < hashRangeStart) //Ring portion is below
+			{
+				return ((hashRangeStart - inputHashRangeEnd) == 1);
+			}
+			else { //Ring is above
+				return (inputHashRangeStart - hashRangeEnd == 1);
+			}
+		}
+
+		public void Merge(Ring inputRing)
+		{
+			hashRangeStart = Math.Min(hashRangeStart, inputRing.hashRangeEnd);
+			hashRangeEnd = Math.Max(hashRangeEnd, inputRing.hashRangeEnd);
+		}
+
 		public Tuple<int, int> GetSplitRingTuple()
 		{
 			Int64 powerOfTwo = Convert.ToInt64(Math.Log(((double)hashRangeEnd - (double)hashRangeStart) + 1) / Math.Log(2));
@@ -74,10 +94,11 @@ namespace DHTSharp
 		public static List<Ring> ParseJoinRequest(string JoinRequest)
 		{
 			List<Ring> assignedRings = new List<Ring>();
+			JoinRequest = JoinRequest.Substring(0, JoinRequest.LastIndexOf("\r\n", StringComparison.Ordinal));
 			String[] splitJoinRequest = JoinRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 			for (int i = 1; i < splitJoinRequest.Length; i++)
 			{
-				String[] ringDetails = splitJoinRequest[i].Split('-');
+				String[] ringDetails = splitJoinRequest[i].Split(',');
 				int ringHashrangeStart = int.Parse(ringDetails[0]);
 				int ringHashrangEnd = int.Parse(ringDetails[1]);
 				Ring newRing = new Ring(ringHashrangeStart, ringHashrangEnd);
