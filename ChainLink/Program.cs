@@ -95,9 +95,15 @@ namespace DHTSharp
 					localNodeRings.Add(newRing);
 				}
 			}
-			finally
+
+			if (!manager.Run())
 			{
-				manager.Run();
+				logger.Log("Failed to start hash table manager. Critical error. Application exiting.", LoggingLevel.CRITICAL);
+				return;
+			}
+			else
+			{
+				logger.Log("Started hash table manager.", LoggingLevel.VERBOSE);
 			}
 
 			//Application configured -> Start up main loop
@@ -110,12 +116,6 @@ namespace DHTSharp
 			catch (Exception e)
 			{
 				logger.Log("Failed to start socket server. Caught exception: " + e.ToString() + ", error likely due to incorrect IP/socket", LoggingLevel.CRITICAL);
-				return;
-			}
-
-			if (!manager.Run())
-			{
-				logger.Log("Failed to start hash table manager. Critical error. Application exiting.", LoggingLevel.CRITICAL);
 				return;
 			}
 

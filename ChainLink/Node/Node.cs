@@ -79,7 +79,7 @@ namespace DHTSharp
 				List<Tuple<int, int>> ringTuples = new List<Tuple<int, int>>();
 				foreach (Ring ring in nodeDHTRings)
 				{
-					Tuple<int, int> ringTuple = new Tuple<int, int>(ring.GetHashRangeStart(), ring.GetHashRangeEnd());
+					Tuple<int, int> ringTuple = ring.GetSplitRingTuple();
 					if (ringTuples.Contains(ringTuple))
 					{
 						Ring newRing = ring.Split(false);
@@ -96,6 +96,7 @@ namespace DHTSharp
 					else
 					{
 						Ring newRing = ring.Split(true);
+						newRings.Add(newRing);
 						ringTuples.Add(ringTuple);
 					}
 				}

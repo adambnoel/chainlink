@@ -10,6 +10,7 @@ namespace DHTSharp
 	public class HashTableManager
 	{
 		private Node currentNode;
+		private volatile bool higherPriorityTaskLock = false;
 		private Semaphore networkNodeLock = new Semaphore(1, 1);
 		private List<Node> networkNodes = new List<Node>();
 
@@ -66,8 +67,13 @@ namespace DHTSharp
 		{
 			String joinRequestResponse = "$\r\n";
 			List<Ring> newRings = currentNode.SplitNodeRings();
+			if (newRings.Count == 0)
+			{
+				return "!\r\nFailed to join network. Rings could not be split";
+			}
 			foreach (Ring newRing in newRings)
 			{
+				logger.Log("Responding to join request with new ring details", LoggingLevel.DEBUGGING);
 				node.AddRing(newRing);
 				joinRequestResponse = joinRequestResponse + newRing.GetHashRangeStart() + "-" + newRing.GetHashRangeEnd() + "\r\n";
 			}
@@ -174,6 +180,36 @@ namespace DHTSharp
 			return true;
 		}
 
+		//Transfer keys to new node
+		private void newNodeTransferTask(Object state)
+		{
+			higherPriorityTaskLock = true;
+			networkNodeLock.WaitOne();
+			try
+			{
+				while (newNodes.Count != 0)
+				{
+					try
+					{
+						Node newNode = newNodes.Dequeue();
+						List<String> keysToMigrate = new List<String>();
+
+						//List<String> keysToMigrate = hashTableWrapper.GetKeysWithinHashrange(newNode.
+					}
+					finally
+					{
+
+					}
+				}
+			}
+			finally
+			{
+				higherPriorityTaskLock = false;
+				networkNodeLock.Release();
+			}
+		}
+
+		//This task deals with nodes that joined the network from sending a join request to this node
 		private void newNodeTask(Object state)
 		{
 			//Attain a lock on the network node object until all new nodes are added
@@ -185,13 +221,13 @@ namespace DHTSharp
 					try
 					{
 						Node newNode = newNodes.Dequeue();
-						var nodeCheck = (from x in networkNodes
-										 where x.GetIPAddress().Equals(newNode.GetIPAddress())
-										 && x.GetHashCode().Equals(newNode.GetHashCode())
-										 select x).FirstOrDefault();
-						if (nodeCheck == null) //Node isn't added -> let us add it
+						Boolean NodeIsNew = ((from x in networkNodes
+													  where x.GetIPAddress().Equals(newNode.GetIPAddress())
+													  && x.GetHashCode().Equals(newNode.GetHashCode())
+													  select x).FirstOrDefault() == null);
+						if (NodeIsNew)
 						{
-							networkNodes.Add(newNode);
+
 						}
 					}
 					finally
@@ -294,7 +330,7 @@ namespace DHTSharp
 					clientRequestHandlers.Remove(handler);
 				}
 			}
-			catch (Exception e)
+			finally
 			{
 				clientRequestHandlerLock.Release();
 			}

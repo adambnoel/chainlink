@@ -15,7 +15,7 @@ namespace DHTSharp
 
 		public String Process()
 		{
-			TcpRequest request = new TcpRequest(destinationNode.GetIPAddress(), destinationNode.GetHashCode());
+			TcpRequest request = new TcpRequest(destinationNode.GetIPAddress(), destinationNode.GetNodeSocket());
 			return request.Send(initializeJoinRequest());
 		}
 		private String initializeJoinRequest()

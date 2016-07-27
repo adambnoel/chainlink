@@ -41,6 +41,15 @@ namespace DHTSharp
 			return false;
 		}
 
+		public Tuple<int, int> GetSplitRingTuple()
+		{
+			Int64 powerOfTwo = Convert.ToInt64(Math.Log(((double)hashRangeEnd - (double)hashRangeStart) + 1) / Math.Log(2));
+			Int64 scalingFactor = (Int64)((Math.Pow(2, powerOfTwo - 1)));
+
+			int estimatedHashRangeEnd = (int)((Int64)hashRangeEnd - scalingFactor); //Int 64 to prevent overflow
+			return new Tuple<int, int>(hashRangeStart, estimatedHashRangeEnd);
+		}
+
 		public Ring Split(bool SplitFromTop)
 		{
 			Int64 powerOfTwo = Convert.ToInt64(Math.Log(((double)hashRangeEnd - (double)hashRangeStart) + 1) / Math.Log(2));
