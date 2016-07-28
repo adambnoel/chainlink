@@ -6,11 +6,13 @@ namespace DHTSharp
 		private string key;
 		private string body;
 		private Node destinationNode;
-		public PutRequest(string requestKey, string requestBody, Node DestinationNode)
+		private Boolean retransmit;
+		public PutRequest(string requestKey, string requestBody, Node DestinationNode, Boolean Retransmit)
 		{
 			key = requestKey;
 			body = requestBody;
 			destinationNode = DestinationNode;
+			retransmit = Retransmit;
 		}
 		public String Process()
 		{
@@ -23,6 +25,7 @@ namespace DHTSharp
 			String putRequest = "+\r\n";
 			putRequest = putRequest + key + "\r\n";
 			putRequest = putRequest + body + "\r\n";
+			putRequest = (retransmit ? putRequest : putRequest + "|\r\n");
 			return putRequest;
 		}
 	}

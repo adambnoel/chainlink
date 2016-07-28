@@ -5,18 +5,22 @@ namespace DHTSharp
 	{
 		private HashTableManager tableManager;
 		private String requestKey;
+		private Boolean retransmitRequest = true;
 
 		public DeleteRequestProcessor(HashTableManager TableManager, String DeleteRequest)
 		{
 			tableManager = TableManager;
 			String[] splitDeleteRequest = DeleteRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 			requestKey = splitDeleteRequest[1];
-
+			if (splitDeleteRequest.Length == 3)
+			{
+				retransmitRequest = false;
+			}
 		}
 
 		public String ProcessAndRespond()
 		{
-			return generateResponse(tableManager.DeleteKey(requestKey));
+			return generateResponse(tableManager.DeleteKey(requestKey, retransmitRequest));
 		}
 
 		private String generateResponse(String requestResult)

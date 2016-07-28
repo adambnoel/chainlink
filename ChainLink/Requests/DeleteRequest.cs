@@ -5,10 +5,12 @@ namespace DHTSharp
 	{
 		private String key;
 		private Node destinationNode;
-		public DeleteRequest(String requestKey, Node DestinationNode)
+		private Boolean retransmit;
+		public DeleteRequest(String requestKey, Node DestinationNode, Boolean Retransmit)
 		{
 			key = requestKey;
 			destinationNode = DestinationNode;
+			retransmit = Retransmit;
 		}
 
 		public String Process()

@@ -97,7 +97,7 @@ namespace DHTSharp
 			}
 		}
 
-		public String DeleteKey(String key)
+		public String DeleteKey(String key, Boolean retransmission)
 		{
 			byte[] valueBytes = new byte[0];
 			if (currentNode.CheckNodeRingsForKey(key.GetHashCode()))
@@ -108,15 +108,21 @@ namespace DHTSharp
 					return "Failed to delete key - either key already deleted or resource locked.";
 				}
 				else {
+					if (retransmission)
+					{
+						Thread consistencyThread = new Thread(() => deleteConsistencyTask(key));
+						consistencyThread.Start();
+					}
 					return "Deleted key: " + key;
 				}
+
 			}
 			else {
 				for (int i = 0; i < networkNodes.Count; i++)
 				{
 					if (networkNodes[i].CheckNodeRingsForKey(key.GetHashCode()))
 					{
-						DeleteRequest deleteRequest = new DeleteRequest(key, networkNodes[i]);
+						DeleteRequest deleteRequest = new DeleteRequest(key, networkNodes[i], true);
 						return deleteRequest.Process();
 					}
 				}
@@ -135,6 +141,7 @@ namespace DHTSharp
 					return "";
 				}
 				else {
+					
 					return Encoding.ASCII.GetString(valueBytes);
 				}
 			}
@@ -152,12 +159,17 @@ namespace DHTSharp
 			}
 		}
 
-		public String PutKey(String key, String contents)
+		public String PutKey(String key, String contents, Boolean retransmission)
 		{
 			if (currentNode.CheckNodeRingsForKey(key.GetHashCode()))
 			{
 				if (hashTableWrapper.Put(key, Encoding.ASCII.GetBytes(contents)))
 				{
+					if (retransmission)
+					{
+						Thread consistencyThread = new Thread(() => putConsistencyTask(key, contents));
+						consistencyThread.Start();
+					}
 					return "OK";
 				}
 				else
@@ -171,7 +183,7 @@ namespace DHTSharp
 				{
 					if (networkNodes[i].CheckNodeRingsForKey(key.GetHashCode()))
 					{
-						PutRequest putRequest = new PutRequest(key, contents, networkNodes[i]);
+						PutRequest putRequest = new PutRequest(key, contents, networkNodes[i], retransmission);
 						return putRequest.Process();
 					}
 				}
@@ -209,8 +221,10 @@ namespace DHTSharp
 		//Transfer keys to new node
 		private void newNodeTransferTask(Object state)
 		{
+			Boolean shouldGossip = false;
 			while (newNodes.Count != 0)
 			{
+				shouldGossip = true; //Gossip network changes once done
 				try
 				{
 					Node addedNode = newNodes.Dequeue();
@@ -226,10 +240,19 @@ namespace DHTSharp
 							List<String> keysToMigrate = relevantNode.GetKeysWithinHashTable(hashTableWrapper);
 							foreach (String keyToMigrate in keysToMigrate)
 							{
-								byte[] transferPayload = hashTableWrapper.Delete(keyToMigrate);
-								PutRequest putRequest = new PutRequest(keyToMigrate, Encoding.ASCII.GetString(transferPayload), relevantNode);
+								byte[] transferPayload;
+								if (currentNode.CheckNodeRingsForKey(keyToMigrate.GetHashCode())) //Edge case when rings are overlapping
+								{ 
+									transferPayload = hashTableWrapper.Get(keyToMigrate);
+								}
+								else 
+								{
+									transferPayload = hashTableWrapper.Delete(keyToMigrate);
+								}
+								PutRequest putRequest = new PutRequest(keyToMigrate, Encoding.ASCII.GetString(transferPayload), relevantNode, false);
 								Thread transferThread = new Thread(() => keyTransferTask(putRequest));
 								transferThread.Start();
+
 							}
 						}
 						finally
@@ -242,6 +265,10 @@ namespace DHTSharp
 				{
 
 				}
+			}
+			if (shouldGossip)
+			{
+				Thread gossipThread = new Thread(gossipTask);
 			}
 		}
 
@@ -270,37 +297,45 @@ namespace DHTSharp
 			}
 		}
 
-		private void removeNodeTask(Object state)
-		{
-
-		}
-
 		private void pingTask(Object state)
 		{
 			foreach (Node node in networkNodes)
 			{
-				if (!node.RecentlyPinged())
+				Monitor.Enter(node);
+				try
 				{
-					logger.Log("Pinging network node: " + node.GetIPAddress().ToString() + "," + node.GetNodeSocket(), LoggingLevel.DEBUGGING);
-					PingRequest newPingRequest = new PingRequest(node);
-					String response = newPingRequest.Process();
-					if (response != String.Empty)
+					if (!node.RecentlyPinged())
 					{
-						String[] splitPingResponse = response.Split(new String[] { "\r\n" }, StringSplitOptions.None);
-						if (splitPingResponse[0] == "@" && splitPingResponse.Length < 2)
+						logger.Log("Pinging network node: " + node.GetIPAddress().ToString() + "," + node.GetNodeSocket(), LoggingLevel.DEBUGGING);
+						PingRequest newPingRequest = new PingRequest(node);
+						String response = newPingRequest.Process();
+						if (response != String.Empty)
 						{
-							DateTime lastResponseTime = DateTime.UtcNow;
-							if (DateTime.TryParse(splitPingResponse[1], out lastResponseTime)) {
-								node.SetLastPingTimeUtc(lastResponseTime);
+							response = response.Substring(0, response.LastIndexOf("\r\n", StringComparison.Ordinal));
+							String[] splitPingResponse = response.Split(new String[] { "\r\n" }, StringSplitOptions.None);
+							if (splitPingResponse[0] == "@" && splitPingResponse.Length <= 2)
+							{
+								DateTime lastResponseTime = DateTime.UtcNow;
+								if (DateTime.TryParse(splitPingResponse[1], out lastResponseTime))
+								{
+									node.SetLastPingTimeUtc(lastResponseTime);
+								}
+								logger.Log("Got response from network node: " + node.GetIPAddress().ToString() + "," + node.GetNodeSocket(), LoggingLevel.DEBUGGING);
 							}
-							logger.Log("Got response from network node: " + node.GetIPAddress().ToString() + "," + node.GetNodeSocket(), LoggingLevel.DEBUGGING);
+						}
+						else
+						{
+							node.CheckHeartbeat();
 						}
 					}
 				}
+				finally
+				{
+					Monitor.Exit(node);
+				}
 			}
 		}
-	
-							    //
+
 		private void connectionCheckTask(Object state)
 		{
 			clientRequestHandlerLock.WaitOne();
@@ -326,6 +361,30 @@ namespace DHTSharp
 			}
 		}
 
+		private void putConsistencyTask(String key, String contents)
+		{
+			foreach (Node node in networkNodes)
+			{
+				if (node.CheckNodeRingsForKey(key.GetHashCode())) {
+					PutRequest putRequest = new PutRequest(key, contents, node, false);
+					Thread newThread = new Thread(() => keyTransferTask(putRequest));
+					newThread.Start();
+				}
+			}
+		}
+
+		private void deleteConsistencyTask(String key)
+		{
+			foreach (Node node in networkNodes)
+			{
+				if (node.CheckNodeRingsForKey(key.GetHashCode()))
+				{
+					DeleteRequest deleteRequest = new DeleteRequest(key, node, false);
+
+				}
+			}
+		}
+
 		private void keyTransferTask(PutRequest request)
 		{
 			try
@@ -337,6 +396,24 @@ namespace DHTSharp
 
 			}
 		}
+
+		private void deleteTransferTask(DeleteRequest request)
+		{
+			try
+			{
+				request.Process();
+			}
+			catch (Exception e)
+			{
+
+			}
+		}
+
+		private void gossipTask()
+		{
+			
+		}
+
 	}
 }
 

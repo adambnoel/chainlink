@@ -19,7 +19,10 @@ namespace DHTSharp
 		private int nodeSocket;
 		private DateTime lastPingTimeUtc;
 		private int pingRefreshTimeSeconds = 300; //Ping node every five minutes
+		private int numTimeOuts = 0;
+		private int maxNumTimeOuts = 2;
 		private Semaphore lockRings = new Semaphore(1, 1);
+
 
 		public Node (List<Ring> DHTRings, IPAddress NodeAddress, int Socket) 
 		{
@@ -45,7 +48,7 @@ namespace DHTSharp
 
 		public Boolean RecentlyPinged()
 		{
-			return (lastPingTimeUtc.AddSeconds(pingRefreshTimeSeconds) < DateTime.UtcNow);
+			return !(lastPingTimeUtc.AddSeconds(pingRefreshTimeSeconds) < DateTime.UtcNow);
 		}
 
 		public DateTime GetLastPingTimeUtc()
@@ -57,6 +60,20 @@ namespace DHTSharp
 		{
 			lastPingTimeUtc = newPingTime;
 		}
+
+		public Boolean CheckHeartbeat()
+		{
+			numTimeOuts = numTimeOuts + 1;
+			if (numTimeOuts >= maxNumTimeOuts)
+			{
+				return false;
+			}
+			else 
+			{
+				return true;
+			}
+		}
+
 
 		public String GetSerializedRings()
 		{

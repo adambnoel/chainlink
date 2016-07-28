@@ -6,6 +6,7 @@ namespace DHTSharp
 		private HashTableManager tableManager;
 		private String requestKey;
 		private String requestBody;
+		private Boolean retransmitRequest = true;
 
 		public PutRequestProcessor(HashTableManager TableManager, String PutRequest)
 		{
@@ -13,11 +14,15 @@ namespace DHTSharp
 			String[] splitPutRequest = PutRequest.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 			requestKey = splitPutRequest[1];
 			requestBody = splitPutRequest[2];
+			if (splitPutRequest.Length > 3)
+			{
+				retransmitRequest = false;
+			}
 		}
 
 		public String ProcessAndRespond()
 		{
-			return generateResponse(tableManager.PutKey(requestKey, requestBody));
+			return generateResponse(tableManager.PutKey(requestKey, requestBody, retransmitRequest));
 		}
 
 		private String generateResponse(String requestResult)
