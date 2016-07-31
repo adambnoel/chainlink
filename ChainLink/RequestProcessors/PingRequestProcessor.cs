@@ -16,7 +16,6 @@ namespace DHTSharp
 
 		public String ProcessAndRespond()
 		{
-			tableManager.PingNetworkNode(sourceNode);
 			return generateResponse();
 		}
 

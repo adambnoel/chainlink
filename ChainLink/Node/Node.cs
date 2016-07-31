@@ -74,6 +74,10 @@ namespace DHTSharp
 			}
 		}
 
+		public List<Ring> GetNodeRings()
+		{
+			return nodeDHTRings;
+		}
 
 		public String GetSerializedRings()
 		{
@@ -162,7 +166,15 @@ namespace DHTSharp
 			return keysWithinRange;
 		}
 
-
+		public List<String> GetNodeRingDetails()
+		{
+			List<String> ringDetails = new List<String>();
+			foreach (Ring r in nodeDHTRings)
+			{
+				ringDetails.Add(r.GetHashRangeStart() + "," + r.GetHashRangeEnd());
+			}
+			return ringDetails;
+		}
 
 		public Boolean MergeRings(List<Ring> RingsToMerge)
 		{

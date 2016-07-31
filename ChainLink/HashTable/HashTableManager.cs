@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 
@@ -13,11 +14,8 @@ namespace DHTSharp
 		private Semaphore networkNodeLock = new Semaphore(1, 1);
 		private List<Node> networkNodes = new List<Node>();
 
-		private Queue<Node> recentNodePings = new Queue<Node>();
-		private Timer updateNodeTimer;
 		private Queue<Node> newNodes = new Queue<Node>();
 		private Timer newNodeTimer;
-
 		private Timer pingTimer;
 		private Timer connectionCheckTimer;
 
@@ -46,15 +44,6 @@ namespace DHTSharp
 		{
 			clientRequestHandlers.Add(clientRequestHandler);
 			return true;
-		}
-
-		public void PingNetworkNode(Node sourceNode)
-		{
-			Node relevantNode = (from x in networkNodes
-								 where x.GetIPAddress().Equals(sourceNode.GetIPAddress())
-								 && x.GetHashCode().Equals(sourceNode.GetHashCode())
-								 select x).FirstOrDefault();
-			recentNodePings.Enqueue(sourceNode);
 		}
 
 		//This method would be used by the service to leave the network
@@ -94,6 +83,16 @@ namespace DHTSharp
 			}
 			else {
 				return "!\r\nFailed to process leave request. Cannot merge rings";
+			}
+		}
+
+		public void ProcessGossipRequest(String gossipRequestString)
+		{
+			gossipRequestString = gossipRequestString.Substring(0, gossipRequestString.LastIndexOf("\r\n", StringComparison.Ordinal));
+			String[] splitString = gossipRequestString.Split(new String[] { "\r\n" }, StringSplitOptions.None);
+			if (splitString[0] == "#" && splitString.Length >= 4)
+			{
+				
 			}
 		}
 
@@ -272,31 +271,6 @@ namespace DHTSharp
 			}
 		}
 
-		private void updateNodeTask(Object state)
-		{
-			
-			while (recentNodePings.Count != 0)
-			{
-				networkNodeLock.WaitOne();
-				try
-				{
-					Node pingSourceNode = recentNodePings.Dequeue();
-					var relevantNode = (from x in networkNodes
-										where x.GetIPAddress().Equals(pingSourceNode.GetIPAddress())
-										&& x.GetHashCode().Equals(pingSourceNode.GetHashCode())
-										select x).FirstOrDefault();
-					if (relevantNode != null) //Node was removed -> move on
-					{
-						relevantNode.SetLastPingTimeUtc(pingSourceNode.GetLastPingTimeUtc());
-					}
-				}
-				finally
-				{
-					networkNodeLock.Release(); //Only hold for servicing one ping request
-				}
-			}
-		}
-
 		private void pingTask(Object state)
 		{
 			foreach (Node node in networkNodes)
@@ -325,7 +299,20 @@ namespace DHTSharp
 						}
 						else
 						{
-							node.CheckHeartbeat();
+							if (!node.CheckHeartbeat())
+							{
+								if (currentNode.MergeRings(node.GetNodeRings()))
+								{
+									logger.Log("Other network node gone offline - merged rings into node", LoggingLevel.VERBOSE);
+									RemoveNetworkNode(node);
+									Thread gossipThread = new Thread(gossipTask);
+								}
+								else 
+								{
+									logger.Log("Other network node gone offline. Cannot merge rings. Will leave to other network node", LoggingLevel.VERBOSE);
+									RemoveNetworkNode(node);
+								}
+							}
 						}
 					}
 				}
@@ -411,7 +398,17 @@ namespace DHTSharp
 
 		private void gossipTask()
 		{
-			
+			foreach (Node node in networkNodes)
+			{
+				try
+				{
+					GossipRequest gossipRequest = new GossipRequest(node, networkNodes);
+				}
+				catch (Exception e) //If exception -> Node didn't respond
+				{
+					
+				}
+			}
 		}
 
 	}

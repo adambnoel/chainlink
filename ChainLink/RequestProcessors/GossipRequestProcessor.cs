@@ -13,7 +13,8 @@ namespace DHTSharp
 
 		public String ProcessAndRespond()
 		{
-			return String.Empty;
+			tableManager.ProcessGossipRequest(requestString);
+			return "#\r\n";
 		}
 	}
 }
