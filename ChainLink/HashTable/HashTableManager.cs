@@ -92,7 +92,38 @@ namespace DHTSharp
 			String[] splitString = gossipRequestString.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 			if (splitString[0] == "#" && splitString.Length >= 4)
 			{
-				
+				List<Node> gossipedNodes = new List<Node>();
+				int numberOfRings = currentNode.GetNodeRings().Count;
+				int nodeSpacing = 2 + numberOfRings;
+				int numberOfNodes = (splitString.Length -1) / (2 + numberOfRings);
+				for (int i = 0; i < numberOfNodes; i++)
+				{
+					List<Ring> r = new List<Ring>();
+					for (int j = 0; j < numberOfRings; j++)
+					{
+						String[] ringRanges = splitString[2 + j + i * nodeSpacing].Split(',');
+						Ring newRing = new Ring(int.Parse(ringRanges[0]), int.Parse(ringRanges[1]));
+						r.Add(newRing);
+					}
+					Node gossipNode = new Node(r, IPAddress.Parse(splitString[1 + i * nodeSpacing]), int.Parse(splitString[2 + i * nodeSpacing]));
+					gossipedNodes.Add(gossipNode);
+				}
+
+				foreach (Node n in gossipedNodes)
+				{
+					if (currentNode.Equals(n))
+					{
+						continue;
+					}
+					foreach (Node networkNode in networkNodes)
+					{
+						if (gossipedNodes.Contains(networkNode))
+						{
+							continue;
+						}
+					}
+					AddNetworkNode(n);
+				}
 			}
 		}
 
